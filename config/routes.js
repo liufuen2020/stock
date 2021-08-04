@@ -49,6 +49,12 @@ export default [
     component: './TableList',
   },
   {
+    name: 'list.table-list-test',
+    icon: 'CodepenOutlined',
+    path: '/test',
+    component: './TableList',
+  },
+  {
     path: '/',
     redirect: '/welcome',
   },
