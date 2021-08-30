@@ -9,9 +9,11 @@ import {
 import { Alert, Space, message, Tabs } from 'antd';
 import React, { useState } from 'react';
 import ProForm, { ProFormCaptcha, ProFormCheckbox, ProFormText } from '@ant-design/pro-form';
-import { useIntl, Link, history, FormattedMessage, SelectLang, useModel } from 'umi';
+import { useIntl, Link, history, FormattedMessage, SelectLang, useModel, useRequest } from 'umi';
 import Footer from '@/components/Footer';
-import { login } from '@/services/ant-design-pro/api';
+import Local from '@/utils/local';
+
+import { login, getMenu } from '@/services/ant-design-pro/api';
 import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import styles from './index.less';
 
@@ -37,11 +39,11 @@ const Login = () => {
     const userInfo = await initialState?.fetchUserInfo?.();
 
     if (userInfo) {
-      await setInitialState((s) => ({ ...s, currentUser: userInfo }));
+      await setInitialState(s => ({ ...s, currentUser: userInfo }));
     }
   };
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async values => {
     setSubmitting(true);
 
     try {
@@ -57,11 +59,27 @@ const Login = () => {
         await fetchUserInfo();
         /** 此方法会跳转到 redirect 参数所在的位置 */
 
-        if (!history) return;
-        const { query } = history.location;
-        const { redirect } = query;
-        history.push(redirect || '/');
-        return;
+        console.log(123);
+
+        try {
+          // 登录
+          const menuData = await getMenu({ ...values, type });
+          if (!menuData.data) {
+            return false;
+          }
+          if (!history) return;
+          const { query } = history.location;
+          const { redirect } = query;
+          Local.set('menuData', menuData.data);
+          history.push(redirect || '/');
+          return;
+        } catch (error) {
+          const defaultLoginFailureMessage = intl.formatMessage({
+            id: 'pages.login.failure',
+            defaultMessage: '登录失败，请重试！',
+          });
+          message.error(defaultLoginFailureMessage);
+        }
       } // 如果失败去设置用户错误信息
 
       setUserLoginState(msg);
@@ -118,7 +136,7 @@ const Login = () => {
                 },
               },
             }}
-            onFinish={async (values) => {
+            onFinish={async values => {
               handleSubmit(values);
             }}
           >
@@ -267,7 +285,7 @@ const Login = () => {
                       ),
                     },
                   ]}
-                  onGetCaptcha={async (phone) => {
+                  onGetCaptcha={async phone => {
                     const result = await getFakeCaptcha({
                       phone,
                     });

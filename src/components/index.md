@@ -84,7 +84,7 @@ export default () => {
           value: 'Pro Layout',
         },
       ]}
-      onSearch={(value) => {
+      onSearch={value => {
         console.log('input', value);
       }}
     />
@@ -136,7 +136,7 @@ export default () => {
   return (
     <NoticeIcon
       count={10}
-      onItemClick={(item) => {
+      onItemClick={item => {
         message.info(`${item.title} 被点击了`);
       }}
       onClear={(title: string, key: string) => message.info('点击了清空更多')}

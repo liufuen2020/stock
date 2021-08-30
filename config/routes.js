@@ -26,16 +26,28 @@ export default [
   },
   {
     path: '/admin',
-    name: 'admin',
+    name: '授权管理',
     icon: 'crown',
-    access: 'canAdmin',
-    component: './Admin',
+    // access: 'canAdmin',
+    // component: './TableList',
     routes: [
       {
-        path: '/admin/sub-page',
-        name: 'sub-page',
+        path: '/admin/role',
+        name: '角色管理',
         icon: 'smile',
-        component: './Welcome',
+        component: './TableList',
+      },
+      {
+        path: '/admin/account',
+        name: '账号管理',
+        icon: 'smile',
+        component: './TableList',
+      },
+      {
+        path: '/admin/menu',
+        name: '菜单管理',
+        icon: 'smile',
+        component: './TableList',
       },
       {
         component: './404',
@@ -43,13 +55,7 @@ export default [
     ],
   },
   {
-    name: 'list.table-list',
-    icon: 'table',
-    path: '/list',
-    component: './TableList',
-  },
-  {
-    name: 'list.table-list-test',
+    name: '菜单管理',
     icon: 'CodepenOutlined',
     path: '/test',
     component: './TableList',

@@ -71,3 +71,10 @@ export async function removeRule(options) {
     ...(options || {}),
   });
 }
+
+export async function getMenu(options) {
+  return request('/api/menu', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
