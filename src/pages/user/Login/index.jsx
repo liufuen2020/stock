@@ -1,19 +1,12 @@
-import {
-  AlipayCircleOutlined,
-  LockOutlined,
-  MobileOutlined,
-  TaobaoCircleOutlined,
-  UserOutlined,
-  WeiboCircleOutlined,
-} from '@ant-design/icons';
-import { Alert, Space, message, Tabs } from 'antd';
+import { LockOutlined, MobileOutlined, UserOutlined } from '@ant-design/icons';
+import { Alert, message, Tabs } from 'antd';
 import React, { useState } from 'react';
 import ProForm, { ProFormCaptcha, ProFormCheckbox, ProFormText } from '@ant-design/pro-form';
-import { useIntl, Link, history, FormattedMessage, SelectLang, useModel, useRequest } from 'umi';
+import { useIntl, Link, history, FormattedMessage, SelectLang, useModel } from 'umi';
 import Footer from '@/components/Footer';
 import Local from '@/utils/local';
-
-import { login, getMenu } from '@/services/ant-design-pro/api';
+import { login } from '@/services/ant-design-pro/api';
+// import { login, getMenu } from '@/services/ant-design-pro/api';
 import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import styles from './index.less';
 
@@ -30,14 +23,13 @@ const LoginMessage = ({ content }) => (
 
 const Login = () => {
   const [submitting, setSubmitting] = useState(false);
-  const [userLoginState, setUserLoginState] = useState({});
+  // const [userLoginState, setUserLoginState] = useState({});
   const [type, setType] = useState('account');
   const { initialState, setInitialState } = useModel('@@initialState');
   const intl = useIntl();
 
   const fetchUserInfo = async () => {
     const userInfo = await initialState?.fetchUserInfo?.();
-
     if (userInfo) {
       await setInitialState(s => ({ ...s, currentUser: userInfo }));
     }
@@ -45,44 +37,41 @@ const Login = () => {
 
   const handleSubmit = async values => {
     setSubmitting(true);
-
     try {
       // 登录
-      const msg = await login({ ...values, type });
-
-      if (msg.status === 'ok') {
+      const payload = {
+        appId: '',
+        captcha: '2323',
+        password: values.password,
+        userName: values.userName,
+      };
+      const msg = await login({ ...payload, type });
+      if (msg.code === 0 && msg.data) {
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: '登录成功！',
         });
+
         message.success(defaultLoginSuccessMessage);
-        await fetchUserInfo();
+
         /** 此方法会跳转到 redirect 参数所在的位置 */
 
-        console.log(123);
-
-        try {
-          // 登录
-          const menuData = await getMenu({ ...values, type });
-          if (!menuData.data) {
-            return false;
-          }
-          if (!history) return;
+        // const menuData = await getMenu({ ...values, type });
+        // if (menuData) {
+        //   Local.set('menuData', menuData.data);
+        // }
+        if (history) {
           const { query } = history.location;
           const { redirect } = query;
-          Local.set('menuData', menuData.data);
-          history.push(redirect || '/');
-          return;
-        } catch (error) {
-          const defaultLoginFailureMessage = intl.formatMessage({
-            id: 'pages.login.failure',
-            defaultMessage: '登录失败，请重试！',
-          });
-          message.error(defaultLoginFailureMessage);
+          Local.set('token', msg.data);
+          await fetchUserInfo();
+          setTimeout(() => {
+            history.push(redirect || '/');
+          }, 50);
         }
-      } // 如果失败去设置用户错误信息
-
-      setUserLoginState(msg);
+      }
+      // 如果失败去设置用户错误信息
+      // setUserLoginState(msg);
     } catch (error) {
       const defaultLoginFailureMessage = intl.formatMessage({
         id: 'pages.login.failure',
@@ -94,7 +83,9 @@ const Login = () => {
     setSubmitting(false);
   };
 
-  const { status, type: loginType } = userLoginState;
+  // const { status, type: loginType } = userLoginState;
+  const { status, type: loginType } = {};
+
   return (
     <div className={styles.container}>
       <div className={styles.lang} data-lang>
@@ -168,7 +159,7 @@ const Login = () => {
             {type === 'account' && (
               <>
                 <ProFormText
-                  name="username"
+                  name="userName"
                   fieldProps={{
                     size: 'large',
                     prefix: <UserOutlined className={styles.prefixIcon} />,
@@ -316,12 +307,6 @@ const Login = () => {
               </a>
             </div>
           </ProForm>
-          <Space className={styles.other}>
-            <FormattedMessage id="pages.login.loginWith" defaultMessage="其他登录方式" />
-            <AlipayCircleOutlined className={styles.icon} />
-            <TaobaoCircleOutlined className={styles.icon} />
-            <WeiboCircleOutlined className={styles.icon} />
-          </Space>
         </div>
       </div>
       <Footer />

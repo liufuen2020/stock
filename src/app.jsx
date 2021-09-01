@@ -6,15 +6,96 @@ import { notification } from 'antd';
 import * as Icon from '@ant-design/icons';
 import RightContent from '@/components/RightContent';
 import Footer from '@/components/Footer';
+
 import { extend } from 'umi-request';
 // import { BookOutlined, LinkOutlined } from '@ant-design/icons';
 // import { smile, HeartOutlined } from '@ant-design/icons';
 import Local from '@/utils/local';
 import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
 
+const setMenu = () => {
+  const menus = [
+    {
+      path: '/user',
+      layout: false,
+      routes: [
+        {
+          path: '/user',
+          routes: [
+            {
+              name: 'login',
+              path: '/user/login',
+              component: './user/Login',
+            },
+          ],
+        },
+        {
+          component: './404',
+        },
+      ],
+      id: '1',
+    },
+    {
+      path: '/welcome',
+      name: 'welcome',
+      icon: 'smile',
+      component: './Welcome',
+      id: '2',
+    },
+    {
+      path: '/admin',
+      name: '授权管理',
+      icon: 'crown',
+      id: '6',
+      // access: 'canAdmin',
+      // component: './TableList',
+      routes: [
+        {
+          path: '/admin/role',
+          name: '角色管理',
+          icon: 'smile',
+          component: './TableList',
+        },
+        {
+          path: '/admin/account',
+          name: '账号管理',
+          icon: 'smile',
+          component: './TableList',
+        },
+        {
+          path: '/admin/menu',
+          name: '菜单管理',
+          icon: 'smile',
+          component: './TableList',
+        },
+        {
+          component: './404',
+        },
+      ],
+    },
+    // {
+    //   name: '菜单管理',
+    //   icon: 'CodepenOutlined',
+    //   path: '/test',
+    //   component: './TableList',
+    // },
+    {
+      path: '/',
+      redirect: '/welcome',
+      id: '3',
+    },
+    {
+      component: './404',
+      id: '4',
+    },
+  ];
+  return menus;
+};
+
 const fixMenuItemIcon = menus => {
   menus.forEach(item => {
     const { icon, children } = item;
+
     const iconType = 'Outlined';
     if (typeof icon === 'string') {
       const fixIconName = icon.slice(0, 1).toLocaleUpperCase() + icon.slice(1) + iconType;
@@ -45,7 +126,6 @@ export async function getInitialState() {
     } catch (error) {
       history.push(loginPath);
     }
-
     return undefined;
   }; // 如果是登录页面，不执行
 
@@ -62,7 +142,9 @@ export async function getInitialState() {
     fetchUserInfo,
     settings: {},
   };
-} // ProLayout 支持的api https://procomponents.ant.design/components/layout
+}
+
+// ProLayout 支持的api https://procomponents.ant.design/components/layout
 
 export const layout = ({ initialState }) => {
   return {
@@ -73,9 +155,10 @@ export const layout = ({ initialState }) => {
     },
     footerRender: () => <Footer />,
     onPageChange: () => {
-      const { location } = history; // 如果没有登录，重定向到 login
-
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
+      // const { location } = history; // 如果没有登录，重定向到 login
+      const token = Local.get('token');
+      // if (!initialState?.currentUser && location.pathname !== loginPath) {
+      if (!token) {
         history.push(loginPath);
       }
     },
@@ -93,7 +176,8 @@ export const layout = ({ initialState }) => {
       : [],
     menuHeaderRender: undefined,
     menuDataRender: () => {
-      const menu = Local.get('menuData') || [];
+      const menu = setMenu(Local.get('menuData') || []);
+
       const newMenu = fixMenuItemIcon(menu);
       return newMenu;
     },
@@ -108,14 +192,17 @@ const request = extend({
 // 请求拦截
 request.interceptors.request.use(async (url, options) => {
   const headers = {};
-  headers.Authorization = `Bearer 123`;
+  const token = Local.get('token');
+  if (token && url.indexOf('/login') === -1) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   return {
     url,
     options: { ...options, headers },
   };
 });
 
-// 返回拦截
 request.interceptors.response.use(async res => {
   const response = await res.clone();
   const codeMaps = {
@@ -130,10 +217,10 @@ request.interceptors.response.use(async res => {
     503: '服务不可用，服务器暂时过载或维护。',
     504: '网关超时。',
   };
-
   if (response.status === 401) {
     // 跳转登录
     Local.clear();
+    history.push(loginPath);
     return false;
   }
 

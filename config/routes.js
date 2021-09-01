@@ -35,19 +35,19 @@ export default [
         path: '/admin/role',
         name: '角色管理',
         icon: 'smile',
-        component: './TableList',
+        component: './RoleList',
       },
       {
         path: '/admin/account',
         name: '账号管理',
         icon: 'smile',
-        component: './TableList',
+        component: './UserList',
       },
       {
         path: '/admin/menu',
         name: '菜单管理',
         icon: 'smile',
-        component: './TableList',
+        component: './MenuList',
       },
       {
         component: './404',

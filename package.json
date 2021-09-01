@@ -54,6 +54,7 @@
     "@ant-design/pro-table": "^2.30.8",
     "@umijs/route-utils": "^1.0.36",
     "antd": "^4.14.0",
+    "axios": "^0.21.1",
     "babel-eslint": "^10.1.0",
     "classnames": "^2.2.6",
     "eslint-config-airbnb": "^18.2.1",

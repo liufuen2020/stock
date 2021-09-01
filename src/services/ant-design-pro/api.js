@@ -5,8 +5,8 @@ import { request } from 'umi';
 /** 获取当前的用户 GET /api/currentUser */
 
 export async function currentUser(options) {
-  return request('/api/currentUser', {
-    method: 'GET',
+  return request('/api/getUserInfo', {
+    method: 'get',
     ...(options || {}),
   });
 }
@@ -21,7 +21,7 @@ export async function outLogin(options) {
 /** 登录接口 POST /api/login/account */
 
 export async function login(body, options) {
-  return request('/api/login/account', {
+  return request('/api/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -38,43 +38,87 @@ export async function getNotices(options) {
     ...(options || {}),
   });
 }
-/** 获取规则列表 GET /api/rule */
 
-export async function rule(params, options) {
-  return request('/api/rule', {
-    method: 'GET',
-    params: { ...params },
-    ...(options || {}),
-  });
-}
+//  ------------------------------------------------------------------------------------------------
+
 /** 新建规则 PUT /api/rule */
-
-export async function updateRule(options) {
-  return request('/api/rule', {
-    method: 'PUT',
+export async function addRule(body, options) {
+  return request('/api/sysRole/role', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   });
 }
-/** 新建规则 POST /api/rule */
 
-export async function addRule(options) {
-  return request('/api/rule', {
-    method: 'POST',
+export async function upadataRule(body, options) {
+  return request('/api/sysRole/role', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   });
 }
 /** 删除规则 DELETE /api/rule */
 
 export async function removeRule(options) {
-  return request('/api/rule', {
+  return request(`/api/sysRole/role/${options}`, {
     method: 'DELETE',
+  });
+}
+// 角色
+export async function getRule(params, options) {
+  return request('/api/sysRole/list', {
+    method: 'GET',
+    params: { ...params },
+    ...(options || {}),
+  });
+}
+// 角色详情
+export async function getRuleDetail(options) {
+  return request(`/api/sysRole/role/${options}`, {
+    method: 'GET',
+  });
+}
+
+// 菜单
+export async function getMenu(params, options) {
+  return request('/api/sysMenu/list', {
+    method: 'GET',
+    params: { ...params },
+    ...(options || {}),
+  });
+}
+// 用户列表
+export async function sysUserList(params, options) {
+  return request('/api/sysUser/list', {
+    method: 'GET',
+    params: { ...params },
     ...(options || {}),
   });
 }
 
-export async function getMenu(options) {
-  return request('/api/menu', {
+// 菜单增加
+export async function addMenu(body, options) {
+  return request('/api/sysMenu/menu', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+// 菜单树
+export async function meunTree(params, options) {
+  return request('/api/sysMenu/meunTree', {
     method: 'GET',
+    params: { ...params },
     ...(options || {}),
   });
 }

@@ -1,15 +1,15 @@
 const local = {
-  set(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
+  get: key => {
+    return JSON.parse(localStorage.getItem(key));
   },
-  get(key, defaultValue = '') {
-    return JSON.parse(localStorage.getItem(key)) || defaultValue;
+  set: (key, data) => {
+    return localStorage.setItem(key, JSON.stringify(data));
   },
-  remove(key) {
-    localStorage.removeItem(key);
+  remove: key => {
+    return localStorage.removeItem(key);
   },
-  clear() {
-    localStorage.clear();
+  clear: () => {
+    return localStorage.clear();
   },
 };
 export default local;
