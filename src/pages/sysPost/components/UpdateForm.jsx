@@ -66,9 +66,10 @@ const UpdateForm = props => {
   const addData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
+
     addUser({ ...values }).then(res => {
-      setLoading(false);
       hide();
+      setLoading(false);
       if (res.code === 0) {
         onCancel(false);
         onSuccess();

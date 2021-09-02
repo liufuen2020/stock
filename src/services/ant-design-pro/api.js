@@ -13,11 +13,22 @@ export async function currentUser(options) {
 /** 退出登录接口 POST /api/login/outLogin */
 
 export async function outLogin(options) {
-  return request('/api/login/outLogin', {
+  return request('/api/logout', {
     method: 'POST',
     ...(options || {}),
   });
 }
+
+/**验证码 */
+// 角色
+export async function getCaptcha(params, options) {
+  return request('/api/captcha', {
+    method: 'GET',
+    params: { ...params },
+    ...(options || {}),
+  });
+}
+
 /** 登录接口 POST /api/login/account */
 
 export async function login(body, options) {
@@ -72,7 +83,7 @@ export async function removeRule(options) {
 }
 // 角色
 export async function getRule(params, options) {
-  return request('/api/sysRole/list', {
+  return request('/api/sysRole/page', {
     method: 'GET',
     params: { ...params },
     ...(options || {}),
@@ -85,38 +96,18 @@ export async function getRuleDetail(options) {
   });
 }
 
-// 菜单
-export async function getMenu(params, options) {
-  return request('/api/sysMenu/list', {
-    method: 'GET',
-    params: { ...params },
-    ...(options || {}),
-  });
-}
-// 用户列表
-export async function sysUserList(params, options) {
-  return request('/api/sysUser/list', {
-    method: 'GET',
-    params: { ...params },
-    ...(options || {}),
-  });
-}
-
-// 菜单增加
-export async function addMenu(body, options) {
-  return request('/api/sysMenu/menu', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
 // 菜单树
 export async function meunTree(params, options) {
   return request('/api/sysMenu/meunTree', {
+    method: 'GET',
+    params: { ...params },
+    ...(options || {}),
+  });
+}
+
+// 当前用户 路由
+export async function routes(params, options) {
+  return request('/api/routes', {
     method: 'GET',
     params: { ...params },
     ...(options || {}),

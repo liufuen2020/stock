@@ -17,7 +17,6 @@ const setMenu = () => {
   const menus = [
     {
       path: '/user',
-      layout: false,
       routes: [
         {
           path: '/user',
@@ -69,6 +68,12 @@ const setMenu = () => {
           component: './TableList',
         },
         {
+          path: '/admin/sysPost',
+          name: '岗位管理',
+          icon: 'smile',
+          component: './sysPost',
+        },
+        {
           component: './404',
         },
       ],
@@ -90,6 +95,25 @@ const setMenu = () => {
     },
   ];
   return menus;
+};
+
+const setList = arr => {
+  const newTreeData = [];
+  arr.map(item => {
+    const obj = {
+      path: item.path,
+      name: item.menuName,
+      icon: item.icon,
+      component: item.component,
+    };
+
+    if (item.childrenMenu && item.childrenMenu.length) {
+      obj.routes = setList(item.childrenMenu);
+    }
+    newTreeData.push(obj);
+    return '';
+  });
+  return newTreeData;
 };
 
 const fixMenuItemIcon = menus => {
@@ -177,7 +201,8 @@ export const layout = ({ initialState }) => {
     menuHeaderRender: undefined,
     menuDataRender: () => {
       const menu = setMenu(Local.get('menuData') || []);
-
+      const menu2 = setList(Local.get('currentRoute') || []);
+      console.log(123, menu2);
       const newMenu = fixMenuItemIcon(menu);
       return newMenu;
     },

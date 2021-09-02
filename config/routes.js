@@ -50,6 +50,12 @@ export default [
         component: './MenuList',
       },
       {
+        path: '/admin/sysPost',
+        name: '岗位管理',
+        icon: 'smile',
+        component: './sysPost',
+      },
+      {
         component: './404',
       },
     ],

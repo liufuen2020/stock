@@ -1,2 +1,7 @@
 .eslintrc.js
 .prettierrc.js
+
+build/*.js
+# public
+# dist
+# src

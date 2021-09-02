@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { message, Modal, Form, Input, InputNumber, Row, Col, TreeSelect } from 'antd';
+import { message, Form, Input, InputNumber, Row, Col, TreeSelect, Drawer, Button } from 'antd';
 import { upadataRule, addRule, getRuleDetail } from '@/services/ant-design-pro/api';
 import styles from '../index.less';
 
@@ -10,6 +10,7 @@ const UpdateForm = props => {
   // 初始化 form
   const [form] = Form.useForm();
   const [tvalue, setTValue] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const getDetail = () => {
     getRuleDetail(data.roleId).then(res => {
@@ -65,8 +66,10 @@ const UpdateForm = props => {
    */
   const updataData = values => {
     const hide = message.loading('正在添加');
+    setLoading(true);
     upadataRule({ ...values, roleId: data.roleId, menuIds: tvalue }).then(res => {
       hide();
+      setLoading(false);
       if (res.code === 0) {
         onCancel(false);
         onSuccess();
@@ -83,8 +86,10 @@ const UpdateForm = props => {
    */
   const addData = values => {
     const hide = message.loading('正在添加');
+    setLoading(true);
     addRule({ ...values, menuIds: tvalue }).then(res => {
       hide();
+      setLoading(false);
       if (res.code === 0) {
         onCancel(false);
         onSuccess();
@@ -113,15 +118,27 @@ const UpdateForm = props => {
 
   return (
     <>
-      <Modal
+      <Drawer
         getContainer={false}
         width={640}
-        bodyStyle={{ padding: '32px 40px 48px' }}
-        title="修改角色"
+        title={type === 'updata' ? '修改账号' : '添加账号'}
         visible={visible}
-        onCancel={modelClose}
+        onClose={modelClose}
         maskClosable={false}
-        onOk={sendData}
+        footer={
+          <div
+            style={{
+              textAlign: 'right',
+            }}
+          >
+            <Button onClick={modelClose} style={{ marginRight: 10 }}>
+              取消
+            </Button>
+            <Button onClick={sendData} type="primary" loading={loading} disabled={loading}>
+              保存
+            </Button>
+          </div>
+        }
       >
         <Form {...formItemLayout} name="control-ref" form={form}>
           <Form.Item label="角色名称" name="roleName" rules={[{ required: true }]}>
@@ -147,7 +164,7 @@ const UpdateForm = props => {
             <Input.TextArea maxLength={200} />
           </Form.Item>
         </Form>
-      </Modal>
+      </Drawer>
     </>
   );
 };
