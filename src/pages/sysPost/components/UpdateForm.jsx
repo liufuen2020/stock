@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { message, Drawer, Form, Input, Button, Radio, Select } from 'antd';
-import { upadataUser, addUser, getUserDetail } from '../api';
-
-const { Option } = Select;
+import { message, Drawer, Form, Input, Button, Radio, InputNumber } from 'antd';
+import { addField, upadataField, getDetail } from '../api';
 
 const UpdateForm = props => {
   // 结构化数据
-  const { visible, onCancel, onSuccess, roleList, data, type } = props;
+  const { visible, onCancel, onSuccess, data, type } = props;
 
   // 初始化 form
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
   // 详情
-  const getDetail = () => {
-    getUserDetail(data.userId).then(res => {
+  const getDetailData = () => {
+    getDetail(data.postId).then(res => {
       if (res.code === 0) {
         form.setFieldsValue({ ...res.data, ...data });
       } else {
@@ -25,7 +23,7 @@ const UpdateForm = props => {
 
   useEffect(() => {
     if (type === 'updata' && visible === true) {
-      getDetail();
+      getDetailData();
     } else {
       form.resetFields();
     }
@@ -46,7 +44,7 @@ const UpdateForm = props => {
   const updataData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    upadataUser({ ...values, userId: data.userId }).then(res => {
+    upadataField({ ...values, postId: data.postId }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -67,7 +65,7 @@ const UpdateForm = props => {
     const hide = message.loading('正在添加');
     setLoading(true);
 
-    addUser({ ...values }).then(res => {
+    addField({ ...values }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -121,42 +119,20 @@ const UpdateForm = props => {
         }
       >
         <Form {...formItemLayout} name="control-ref" form={form}>
-          <Form.Item label="用户昵称" name="nickName" rules={[{ required: true }]}>
+          <Form.Item label="岗位名称" name="postName" rules={[{ required: true }]}>
             <Input maxLength={20} />
           </Form.Item>{' '}
-          <Form.Item label="头像" name="avatar">
+          <Form.Item label="岗位编码" name="postCode" rules={[{ required: true }]}>
             <Input maxLength={20} />
           </Form.Item>
-          <Form.Item name="gender" label="性别">
+          <Form.Item width="xs" name="postSort" label="显示顺序" rules={[{ required: true }]}>
+            <InputNumber min={0} max={1000} />
+          </Form.Item>
+          <Form.Item name="gender" label="岗位状态">
             <Radio.Group>
-              <Radio value="0">男</Radio>
-              <Radio value="1">女</Radio>
-              <Radio value="2">未知</Radio>
+              <Radio value="0">正常</Radio>
+              <Radio value="1">停用</Radio>
             </Radio.Group>
-          </Form.Item>
-          <Form.Item label="用户账号" name="userName" rules={[{ required: true }]}>
-            <Input maxLength={20} />
-          </Form.Item>
-          <Form.Item label="手机号" name="phonenumber">
-            <Input maxLength={11} />
-          </Form.Item>
-          <Form.Item label="email" name="email">
-            <Input maxLength={100} />
-          </Form.Item>
-          <Form.Item label="身份证号" name="idCard">
-            <Input maxLength={18} />
-          </Form.Item>
-          <Form.Item name="roleIds" label="选择角色">
-            <Select mode="multiple" placeholder="选择角色">
-              {roleList &&
-                roleList.map(item => {
-                  return (
-                    <Option value={item.roleId} key={item.roleId}>
-                      {item.roleName}
-                    </Option>
-                  );
-                })}
-            </Select>
           </Form.Item>
           <Form.Item label="备注" name="remark">
             <Input.TextArea maxLength={200} />

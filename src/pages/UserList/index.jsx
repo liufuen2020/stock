@@ -4,12 +4,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FormattedMessage } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
-import { sysUserList, getRule, removeRule } from './api';
+import { sysUserList, getRule, removeRule, getSysPost } from './api';
 import UpdateForm from './components/UpdateForm';
 
 /**
- * @en-US Add node
- * @zh-CN 添加节点
+ * @zh-CN 获取列表
  * @param fields
  */
 
@@ -28,7 +27,13 @@ const TableList = () => {
   const [type, setType] = useState();
 
   const [roleList, setRoleList] = useState();
+  const [sysPostList, setSysPostList] = useState();
 
+  /**
+   * @zh-CN 获取角色
+   *
+   * @param
+   */
   const getRoleList = () => {
     getRule().then(res => {
       if (res.code === 0) {
@@ -37,6 +42,18 @@ const TableList = () => {
     });
   };
 
+  /**
+   * @zh-CN 获取岗位
+   *
+   * @param
+   */
+  const getSysPostData = () => {
+    getSysPost().then(res => {
+      if (res.code === 0) {
+        setSysPostList(res.data || []);
+      }
+    });
+  };
   /**
    *  Delete node
    * @zh-CN 删除节点
@@ -63,6 +80,7 @@ const TableList = () => {
 
   useEffect(() => {
     getRoleList();
+    getSysPostData();
   }, []); // 更新数据 组件 ------------------------------------------------------------------
 
   const [updateModalVisible, handleUpdateModalVisible] = useState(false);
@@ -157,6 +175,7 @@ const TableList = () => {
         onSuccess={updataSuccess}
         type={type}
         roleList={roleList}
+        sysPostList={sysPostList}
       />
     </PageContainer>
   );

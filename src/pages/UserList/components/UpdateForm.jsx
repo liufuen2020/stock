@@ -6,7 +6,7 @@ const { Option } = Select;
 
 const UpdateForm = props => {
   // 结构化数据
-  const { visible, onCancel, onSuccess, roleList, data, type } = props;
+  const { visible, onCancel, onSuccess, roleList, sysPostList, data, type } = props;
 
   // 初始化 form
   const [form] = Form.useForm();
@@ -152,6 +152,18 @@ const UpdateForm = props => {
                   return (
                     <Option value={item.roleId} key={item.roleId}>
                       {item.roleName}
+                    </Option>
+                  );
+                })}
+            </Select>
+          </Form.Item>
+          <Form.Item name="postIds" label="选择岗位">
+            <Select mode="multiple" placeholder="选择岗位">
+              {sysPostList &&
+                sysPostList.map(item => {
+                  return (
+                    <Option value={item.postId} key={item.postId}>
+                      {item.postName}
                     </Option>
                   );
                 })}

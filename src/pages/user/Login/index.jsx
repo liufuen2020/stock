@@ -28,13 +28,13 @@ const Login = () => {
   const [type, setType] = useState('account');
   const { initialState, setInitialState } = useModel('@@initialState');
 
-  const [captcha, setCaptcha] = useState();
+  const [captchaImg, setCaptchaImg] = useState();
 
   // 验证码
   const getCaptchaData = () => {
     getCaptcha().then(res => {
       if (res.code === 0) {
-        setCaptcha(res.data && res.data.image);
+        setCaptchaImg(res.data && res.data.image);
       }
     });
   };
@@ -58,7 +58,7 @@ const Login = () => {
       // 登录
       const payload = {
         appId: '',
-        captcha,
+        captcha: values.captcha,
         password: values.password,
         userName: values.userName,
       };
@@ -239,9 +239,9 @@ const Login = () => {
                       },
                     ]}
                   />
-                  {captcha && (
+                  {captchaImg && (
                     <img
-                      src={`data:image/gif;base64,${captcha}`}
+                      src={`data:image/gif;base64,${captchaImg}`}
                       onClick={getCaptchaData}
                       style={{ height: 40, marginBottom: 24 }}
                     />

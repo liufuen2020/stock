@@ -4,7 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FormattedMessage } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
-import { sysUserList, getRule, removeRule } from './api';
+import moment from 'moment';
+import { getList, removeField } from './api';
 import UpdateForm from './components/UpdateForm';
 
 /**
@@ -13,9 +14,9 @@ import UpdateForm from './components/UpdateForm';
  * @param fields
  */
 
-const getSysUserList = async fields => {
+const getListData = async fields => {
   try {
-    const data = await sysUserList({ ...fields });
+    const data = await getList({ ...fields });
     return { data: data.data.list };
   } catch (error) {
     message.error('请求失败，请重试');
@@ -27,16 +28,6 @@ const TableList = () => {
   const actionRef = useRef();
   const [type, setType] = useState();
 
-  const [roleList, setRoleList] = useState();
-
-  const getRoleList = () => {
-    getRule().then(res => {
-      if (res.code === 0) {
-        setRoleList(res.data || []);
-      }
-    });
-  };
-
   /**
    *  Delete node
    * @zh-CN 删除节点
@@ -47,7 +38,7 @@ const TableList = () => {
     const hide = message.loading('正在删除');
 
     try {
-      await removeRule(id);
+      await removeField(id);
       hide();
       message.success('删除成功！');
       if (actionRef.current) {
@@ -61,9 +52,7 @@ const TableList = () => {
     }
   };
 
-  useEffect(() => {
-    getRoleList();
-  }, []); // 更新数据 组件 ------------------------------------------------------------------
+  useEffect(() => {}, []); // 更新数据 组件 ------------------------------------------------------------------
 
   const [updateModalVisible, handleUpdateModalVisible] = useState(false);
   const [updataData, setUpdataData] = useState({});
@@ -98,20 +87,19 @@ const TableList = () => {
 
   const columns = [
     {
-      title: '用户名',
-      dataIndex: 'nickName',
+      title: '岗位名称',
+      dataIndex: 'postName',
     },
     {
-      title: '账号',
-      dataIndex: 'userName',
+      title: '岗位状态',
+      dataIndex: 'status',
     },
     {
-      title: '手机号',
-      dataIndex: 'phonenumber',
-    },
-    {
-      title: 'email',
-      dataIndex: 'email',
+      title: '创建时间',
+      dataIndex: 'createTime',
+      render: (_, record) => {
+        return <>{moment(record.createTime).format('YYYY-MM-DD')}</>;
+      },
     },
     {
       title: '操作',
@@ -124,7 +112,7 @@ const TableList = () => {
               编辑
             </Button>
             <Divider type="vertical" />
-            <Button type="link" onClick={() => handleRemove(record.userId)}>
+            <Button type="link" onClick={() => handleRemove(record.postId)}>
               删除
             </Button>
           </>
@@ -138,7 +126,7 @@ const TableList = () => {
       <ProTable
         headerTitle="表格查询"
         actionRef={actionRef}
-        rowKey={record => record.userId}
+        rowKey={record => record.postId}
         search={{
           labelWidth: 120,
         }}
@@ -147,7 +135,7 @@ const TableList = () => {
             <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
           </Button>,
         ]}
-        request={getSysUserList}
+        request={getListData}
         columns={columns}
       />
       <UpdateForm
@@ -156,7 +144,6 @@ const TableList = () => {
         data={updataData}
         onSuccess={updataSuccess}
         type={type}
-        roleList={roleList}
       />
     </PageContainer>
   );

@@ -5,8 +5,8 @@ import { request } from 'umi';
 /** 获取当前的用户 GET /api/currentUser */
 
 // 用户列表
-export async function sysUserList(params, options) {
-  return request('/api/sysUser/list', {
+export async function getList(params, options) {
+  return request('/api/sysPost/page', {
     method: 'GET',
     params: { ...params },
     ...(options || {}),
@@ -14,15 +14,15 @@ export async function sysUserList(params, options) {
 }
 
 // 角色详情
-export async function getUserDetail(options) {
-  return request(`/api/sysUser/user/${options}`, {
+export async function getDetail(options) {
+  return request(`/api/sysPost/post/${options}`, {
     method: 'GET',
   });
 }
 
 // 菜单增加
-export async function addUser(body, options) {
-  return request('/api/sysUser/user', {
+export async function addField(body, options) {
+  return request('/api/sysPost/post', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -32,8 +32,8 @@ export async function addUser(body, options) {
   });
 }
 
-export async function upadataUser(body, options) {
-  return request('/api/sysUser/user', {
+export async function upadataField(body, options) {
+  return request('/api/sysPost/post', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -43,18 +43,10 @@ export async function upadataUser(body, options) {
   });
 }
 
-export async function getRule(params, options) {
-  return request('/api/sysRole/list', {
-    method: 'GET',
-    params: { ...params },
-    ...(options || {}),
-  });
-}
-
 /** 删除规则 DELETE /api/rule */
 
-export async function removeRule(options) {
-  return request(`/api/sysUser/user/${options}`, {
+export async function removeField(options) {
+  return request(`/api/sysPost/post/${options}`, {
     method: 'DELETE',
   });
 }

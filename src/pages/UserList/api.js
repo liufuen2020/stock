@@ -58,3 +58,12 @@ export async function removeRule(options) {
     method: 'DELETE',
   });
 }
+
+// 获取岗位列表
+export async function getSysPost(params, options) {
+  return request('/api/sysPost/list', {
+    method: 'GET',
+    params: { ...params },
+    ...(options || {}),
+  });
+}
