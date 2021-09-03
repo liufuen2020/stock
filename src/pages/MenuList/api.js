@@ -12,10 +12,27 @@ export async function getMenu(params, options) {
   });
 }
 
-// 菜单增加
-export async function addMenu(body, options) {
+// 详情
+export async function getDetail(options) {
+  return request(`/sysMenu/meun/${options}`, {
+    method: 'GET',
+  });
+}
+// 增加
+export async function addField(body, options) {
   return request('/api/sysMenu/menu', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+export async function upadataField(body, options) {
+  return request('/sysMenu/menu', {
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },

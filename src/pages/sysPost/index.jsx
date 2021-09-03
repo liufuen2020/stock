@@ -26,7 +26,6 @@ const getListData = async fields => {
 
 const TableList = () => {
   const actionRef = useRef();
-  const [type, setType] = useState();
 
   /**
    *  Delete node
@@ -52,7 +51,11 @@ const TableList = () => {
     }
   };
 
-  useEffect(() => {}, []); // 更新数据 组件 ------------------------------------------------------------------
+  useEffect(() => {}, []);
+
+  // 更新数据 组件 ------------------------------------------------------------------
+
+  const [type, setType] = useState();
 
   const [updateModalVisible, handleUpdateModalVisible] = useState(false);
   const [updataData, setUpdataData] = useState({});
@@ -79,6 +82,7 @@ const TableList = () => {
     setUpdataData({});
     handleUpdateModalVisible(true);
   };
+  // ----------------------------------------------结束------------------------------------------------------
 
   /**
    * @en-US International configuration

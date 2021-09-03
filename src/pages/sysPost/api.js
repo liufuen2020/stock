@@ -13,14 +13,14 @@ export async function getList(params, options) {
   });
 }
 
-// 角色详情
+// 详情
 export async function getDetail(options) {
   return request(`/api/sysPost/post/${options}`, {
     method: 'GET',
   });
 }
 
-// 菜单增加
+// 增加
 export async function addField(body, options) {
   return request('/api/sysPost/post', {
     method: 'POST',
@@ -43,7 +43,7 @@ export async function upadataField(body, options) {
   });
 }
 
-/** 删除规则 DELETE /api/rule */
+/** 删除  */
 
 export async function removeField(options) {
   return request(`/api/sysPost/post/${options}`, {

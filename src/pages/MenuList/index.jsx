@@ -1,7 +1,9 @@
-import { Button, message, Table } from 'antd';
+import { Button, message, Table, Divider } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import { removeMenu, getMenu } from './api';
+import UpdateForm from './components/UpdateForm';
+import styles from './index.less';
 
 const setList = arr => {
   const newTreeData = [];
@@ -33,6 +35,36 @@ const TableList = () => {
       }
     });
   };
+
+  // 更新数据 组件 ------------------------------------------------------------------
+
+  const [type, setType] = useState();
+
+  const [updateModalVisible, handleUpdateModalVisible] = useState(false);
+  const [updataData, setUpdataData] = useState({});
+
+  const closeUpdateForm = () => {
+    handleUpdateModalVisible(false);
+  };
+
+  const setUpdateForm = param => {
+    setType('updata');
+    handleUpdateModalVisible(true);
+    setUpdataData(param);
+  };
+
+  const updataSuccess = () => {
+    getData();
+  };
+
+  // 添加角色
+  const addData = () => {
+    setType('add');
+    setUpdataData({});
+    handleUpdateModalVisible(true);
+  };
+
+  // ----------------------------------------------结束------------------------------------------------------
 
   const handleRemove = id => {
     removeMenu(id).then(res => {
@@ -80,9 +112,15 @@ const TableList = () => {
       valueType: 'option',
       render: (_, record) => {
         const text = (
-          <Button type="link" onClick={() => handleRemove(record.menuId)}>
-            删除
-          </Button>
+          <>
+            <Button type="link" onClick={() => setUpdateForm(record)}>
+              编辑
+            </Button>
+            <Divider type="vertical" />
+            <Button type="link" onClick={() => handleRemove(record.menuId)}>
+              删除
+            </Button>
+          </>
         );
         return <>{text}</>;
       },
@@ -90,7 +128,20 @@ const TableList = () => {
   ];
   return (
     <PageContainer>
+      <div className={styles.btnBox}>
+        <Button type="primary" onClick={addData}>
+          添加菜单
+        </Button>
+      </div>
       <Table columns={columns} dataSource={menuData} rowKey={record => record.menuId} />
+
+      <UpdateForm
+        visible={updateModalVisible}
+        onCancel={closeUpdateForm}
+        data={updataData}
+        onSuccess={updataSuccess}
+        type={type}
+      />
     </PageContainer>
   );
 };
