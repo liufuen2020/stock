@@ -1,6 +1,7 @@
 import { Button, message, Table, Divider } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
+import { meunTree } from '@/services/ant-design-pro/api';
 import { removeMenu, getMenu } from './api';
 import UpdateForm from './components/UpdateForm';
 import styles from './index.less';
@@ -21,8 +22,38 @@ const setList = arr => {
   return newTreeData;
 };
 
+const setListMenu = arr => {
+  const newTreeData = [];
+  arr.map(res => {
+    const obj = {
+      title: res.menuName,
+      value: res.menuId,
+      key: res.menuId,
+    };
+
+    if (res.children && res.children.length) {
+      obj.children = setList(res.children);
+    }
+    newTreeData.push(obj);
+    return '';
+  });
+  return newTreeData;
+};
 const TableList = () => {
   const [menuData, setMenuData] = useState();
+  const [treeData, setTreeData] = useState([]);
+
+  // console.log(123, treeData);
+
+  const getMenuList = () => {
+    meunTree().then(res => {
+      if (res.code === 0 && res.data && res.data.length) {
+        setTreeData(setListMenu(res.data));
+      } else {
+        message.error(res.msg || '菜单加载失败');
+      }
+    });
+  };
 
   //  加载主数据
   const getData = () => {
@@ -32,9 +63,14 @@ const TableList = () => {
       if (res.code === 0) {
         const newData = setList(res.data || []);
         setMenuData(newData);
+        getMenuList();
       }
     });
   };
+
+  // useEffect(() => {
+  //   getMenuList();
+  // }, []);
 
   // 更新数据 组件 ------------------------------------------------------------------
 
@@ -139,6 +175,7 @@ const TableList = () => {
         visible={updateModalVisible}
         onCancel={closeUpdateForm}
         data={updataData}
+        menuData={treeData}
         onSuccess={updataSuccess}
         type={type}
       />

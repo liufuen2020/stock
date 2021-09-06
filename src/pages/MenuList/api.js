@@ -14,7 +14,7 @@ export async function getMenu(params, options) {
 
 // 详情
 export async function getDetail(options) {
-  return request(`/sysMenu/meun/${options}`, {
+  return request(`/api/sysMenu/meun/${options}`, {
     method: 'GET',
   });
 }
@@ -31,7 +31,7 @@ export async function addField(body, options) {
 }
 
 export async function upadataField(body, options) {
-  return request('/sysMenu/menu', {
+  return request('/api/sysMenu/menu', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

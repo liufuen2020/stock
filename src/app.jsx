@@ -13,102 +13,21 @@ import { extend } from 'umi-request';
 import Local from '@/utils/local';
 import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
 
-const setMenu = () => {
-  const menus = [
-    {
-      path: '/user',
-      routes: [
-        {
-          path: '/user',
-          routes: [
-            {
-              name: 'login',
-              path: '/user/login',
-              component: './user/Login',
-            },
-          ],
-        },
-        {
-          component: './404',
-        },
-      ],
-      id: '1',
-    },
-    {
-      path: '/welcome',
-      name: 'welcome',
-      icon: 'smile',
-      component: './Welcome',
-      id: '2',
-    },
-    {
-      path: '/admin',
-      name: '授权管理',
-      icon: 'crown',
-      id: '6',
-      // access: 'canAdmin',
-      // component: './TableList',
-      routes: [
-        {
-          path: '/admin/role',
-          name: '角色管理',
-          icon: 'smile',
-          component: './TableList',
-        },
-        {
-          path: '/admin/account',
-          name: '账号管理',
-          icon: 'smile',
-          component: './TableList',
-        },
-        {
-          path: '/admin/menu',
-          name: '菜单管理',
-          icon: 'smile',
-          component: './TableList',
-        },
-        {
-          path: '/admin/sysPost',
-          name: '岗位管理',
-          icon: 'smile',
-          component: './sysPost',
-        },
-        {
-          component: './404',
-        },
-      ],
-    },
-    // {
-    //   name: '菜单管理',
-    //   icon: 'CodepenOutlined',
-    //   path: '/test',
-    //   component: './TableList',
-    // },
-    {
-      path: '/',
-      redirect: '/welcome',
-      id: '3',
-    },
-    {
-      component: './404',
-      id: '4',
-    },
-  ];
-  return menus;
-};
-
 const setList = arr => {
   const newTreeData = [];
   arr.map(item => {
     const obj = {
       path: item.path,
       name: item.menuName,
-      icon: item.icon,
+
       component: item.component,
     };
 
-    if (item.childrenMenu && item.childrenMenu.length) {
-      obj.routes = setList(item.childrenMenu);
+    if (item.icon) {
+      obj.icon = item.icon;
+    }
+    if (item.children && item.children.length) {
+      obj.routes = setList(item.children);
     }
     newTreeData.push(obj);
     return '';
@@ -200,9 +119,8 @@ export const layout = ({ initialState }) => {
       : [],
     menuHeaderRender: undefined,
     menuDataRender: () => {
-      const menu = setMenu(Local.get('menuData') || []);
-      const menu2 = setList(Local.get('currentRoute') || []);
-      console.log(123, menu2);
+      // const menu = setMenu(Local.get('menuData') || []);
+      const menu = setList(Local.get('currentRoute') || []);
       const newMenu = fixMenuItemIcon(menu);
       return newMenu;
     },

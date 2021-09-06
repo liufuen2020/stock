@@ -60,12 +60,7 @@ export default [
       },
     ],
   },
-  {
-    name: '菜单管理',
-    icon: 'CodepenOutlined',
-    path: '/test',
-    component: './TableList',
-  },
+
   {
     path: '/',
     redirect: '/welcome',

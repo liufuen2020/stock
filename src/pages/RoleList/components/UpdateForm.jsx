@@ -52,7 +52,7 @@ const UpdateForm = props => {
     },
     treeCheckable: true,
     showCheckedStrategy: SHOW_PARENT,
-    placeholder: 'Please select',
+    placeholder: '',
     style: {
       width: '100%',
     },
