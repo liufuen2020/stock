@@ -32,7 +32,7 @@ const setListMenu = arr => {
     };
 
     if (res.children && res.children.length) {
-      obj.children = setList(res.children);
+      obj.children = setListMenu(res.children);
     }
     newTreeData.push(obj);
     return '';

@@ -11,7 +11,7 @@ import { extend } from 'umi-request';
 // import { BookOutlined, LinkOutlined } from '@ant-design/icons';
 // import { smile, HeartOutlined } from '@ant-design/icons';
 import Local from '@/utils/local';
-import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
+import { currentUser, routes } from './services/ant-design-pro/api';
 
 const setList = arr => {
   const newTreeData = [];
@@ -64,25 +64,40 @@ export const initialStateConfig = {
 export async function getInitialState() {
   const fetchUserInfo = async () => {
     try {
-      const msg = await queryCurrentUser();
+      const msg = await currentUser();
       return msg.data;
     } catch (error) {
       history.push(loginPath);
     }
     return undefined;
-  }; // 如果是登录页面，不执行
+  };
 
+  const fetchCurrentRoute = async () => {
+    try {
+      const msg = await routes();
+      return msg.data;
+    } catch (error) {
+      history.push(loginPath);
+    }
+    return undefined;
+  };
+
+  // 如果是登录页面，不执行
   if (history.location.pathname !== loginPath) {
-    const currentUser = await fetchUserInfo();
+    const currentUserData = await fetchUserInfo();
+    const currentRoute = await fetchCurrentRoute();
     return {
       fetchUserInfo,
-      currentUser,
+      fetchCurrentRoute,
+      currentUser: currentUserData,
+      currentRoute,
       settings: {},
     };
   }
 
   return {
     fetchUserInfo,
+    fetchCurrentRoute,
     settings: {},
   };
 }
@@ -90,6 +105,7 @@ export async function getInitialState() {
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 
 export const layout = ({ initialState }) => {
+  console.log(123, initialState);
   return {
     rightContentRender: () => <RightContent />,
     disableContentMargin: false,
@@ -120,7 +136,8 @@ export const layout = ({ initialState }) => {
     menuHeaderRender: undefined,
     menuDataRender: () => {
       // const menu = setMenu(Local.get('menuData') || []);
-      const menu = setList(Local.get('currentRoute') || []);
+      // const menu = setList(Local.get('currentRoute') || []);
+      const menu = setList(initialState.currentRoute || []);
       const newMenu = fixMenuItemIcon(menu);
       return newMenu;
     },

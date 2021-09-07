@@ -6,7 +6,7 @@ import ProForm, { ProFormCheckbox, ProFormText } from '@ant-design/pro-form';
 import { useIntl, Link, history, FormattedMessage, SelectLang, useModel } from 'umi';
 import Footer from '@/components/Footer';
 import Local from '@/utils/local';
-import { login, getCaptcha, routes } from '@/services/ant-design-pro/api';
+import { login, getCaptcha } from '@/services/ant-design-pro/api';
 // import { login, getMenu } from '@/services/ant-design-pro/api';
 // import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import styles from './index.less';
@@ -47,8 +47,16 @@ const Login = () => {
 
   const fetchUserInfo = async () => {
     const userInfo = await initialState?.fetchUserInfo?.();
+
     if (userInfo) {
       await setInitialState(s => ({ ...s, currentUser: userInfo }));
+    }
+  };
+
+  const fetchRoutes = async () => {
+    const routeList = await initialState?.fetchCurrentRoute?.();
+    if (routeList) {
+      await setInitialState(s => ({ ...s, currentRoute: routeList }));
     }
   };
 
@@ -80,16 +88,20 @@ const Login = () => {
 
           // 获取用户信息
           await fetchUserInfo();
+          await fetchRoutes();
+          setTimeout(() => {
+            history.push(redirect || '/');
+          }, 50);
 
-          // 获取路由
-          routes().then(res => {
-            if (res.code === 0) {
-              Local.set('currentRoute', res.data);
-              setTimeout(() => {
-                history.push(redirect || '/');
-              }, 50);
-            }
-          });
+          // // 获取路由
+          // routes().then(res => {
+          //   if (res.code === 0) {
+          //     Local.set('currentRoute', res.data);
+          //     setTimeout(() => {
+          //       history.push(redirect || '/');
+          //     }, 50);
+          //   }
+          // });
         }
       }
       // 如果失败去设置用户错误信息

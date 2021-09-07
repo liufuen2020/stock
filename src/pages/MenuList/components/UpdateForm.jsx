@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useModel } from 'umi';
 import {
   message,
   Drawer,
@@ -19,6 +20,7 @@ import {
   CalendarOutlined,
   AppstoreOutlined,
 } from '@ant-design/icons';
+
 import { addField, upadataField, getDetail } from '../api';
 
 import styles from '../index.less';
@@ -33,6 +35,15 @@ const UpdateForm = props => {
   const [tvalue, setTValue] = useState();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const { initialState, setInitialState } = useModel('@@initialState');
+
+  const fetchRoutes = async () => {
+    const routeList = await initialState?.fetchCurrentRoute?.();
+    if (routeList) {
+      await setInitialState(s => ({ ...s, currentRoute: routeList }));
+    }
+  };
 
   // 详情
 
@@ -88,19 +99,29 @@ const UpdateForm = props => {
    *
    * @param fields
    */
-  const updataData = values => {
+  const updataData = async values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    upadataField({ ...values, menuId: data.menuId, parentId: tvalue }).then(res => {
+    try {
+      const msg = await upadataField({ ...values, menuId: data.menuId, parentId: tvalue });
       hide();
       setLoading(false);
-      if (res.code === 0) {
+      if (msg.code === 0) {
         onCancel(false);
         onSuccess();
+        message.success('修改成功');
+        await fetchRoutes();
       } else {
-        message.error(res.msg || '修改失败，请重试');
+        message.error(msg.msg || '修改失败，请重试');
       }
-    });
+      return true;
+    } catch (error) {
+      hide();
+      setLoading(false);
+      onCancel(false);
+      message.error('修改失败，请重试');
+      return false;
+    }
   };
   /**
    * @en-US Update node
@@ -108,20 +129,29 @@ const UpdateForm = props => {
    *
    * @param values
    */
-  const addData = values => {
+  const addData = async values => {
     const hide = message.loading('正在添加');
-    setLoading(true);
 
-    addField({ ...values, parentId: tvalue }).then(res => {
+    try {
+      const msg = await addField({ ...values, parentId: tvalue });
       hide();
       setLoading(false);
-      if (res.code === 0) {
-        onCancel(false);
+      if (msg.code === 0) {
+        message.success('修改成功');
         onSuccess();
+        onCancel(false);
+        await fetchRoutes();
       } else {
-        message.error(res.msg || '添加失败，请重试');
+        message.error(msg.msg || '修改失败，请重试');
       }
-    });
+      return true;
+    } catch (error) {
+      hide();
+      setLoading(false);
+      onCancel(false);
+      message.error('修改失败，请重试');
+      return false;
+    }
   };
 
   /**
@@ -193,7 +223,7 @@ const UpdateForm = props => {
           <Form.Item label="菜单名称" name="menuName" rules={[{ required: true }]}>
             <Input maxLength={20} />
           </Form.Item>
-          <Form.Item name="menuType" label="菜单类型">
+          <Form.Item name="menuType" label="菜单类型" rules={[{ required: true }]}>
             <Radio.Group>
               {/* <Radio value="M">目录</Radio> */}
               <Radio value="C">菜单</Radio>
