@@ -54,6 +54,7 @@ const UpdateForm = props => {
       if (res.code === 0) {
         form.setFieldsValue({ ...res.data, ...data });
         setTValue(res.data.parentId || '');
+        setMenuType(res.data.menuType);
       } else {
         message.error(res.msg || '获取详情失败');
       }

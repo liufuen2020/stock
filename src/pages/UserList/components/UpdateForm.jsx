@@ -10,8 +10,6 @@ const UpdateForm = props => {
   // 结构化数据
   const { visible, onCancel, onSuccess, roleList, sysPostList, data, type, sysDeptData } = props;
 
-  console.log(sysDeptData);
-
   // 初始化 form
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -24,6 +22,7 @@ const UpdateForm = props => {
     getUserDetail(data.userId).then(res => {
       if (res.code === 0) {
         form.setFieldsValue({ ...res.data, ...data });
+        setTValue(`${data.deptId}`);
       } else {
         message.error(res.msg || '获取详情失败');
       }
@@ -31,9 +30,12 @@ const UpdateForm = props => {
   };
 
   useEffect(() => {
+    setDeptData(sysDeptData);
+
     if (type === 'updata' && visible === true) {
       getDetail();
     } else {
+      setTValue('');
       form.resetFields();
     }
   }, [visible]);
@@ -53,7 +55,7 @@ const UpdateForm = props => {
   const updataData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    upadataUser({ ...values, userId: data.userId }).then(res => {
+    upadataUser({ ...values, userId: data.userId, deptId: tvalue }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -73,7 +75,7 @@ const UpdateForm = props => {
   const addData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    addUser({ ...values }).then(res => {
+    addUser({ ...values, deptId: tvalue }).then(res => {
       setLoading(false);
       hide();
       if (res.code === 0) {
@@ -117,7 +119,7 @@ const UpdateForm = props => {
         value: item.deptId,
         pId: item.parentId,
         title: item.deptName,
-        isLeaf: false,
+        isLeaf: !item.parentNode,
       };
       newData.push(obj);
       return '';
@@ -125,14 +127,12 @@ const UpdateForm = props => {
     return newData;
   };
 
-  const onLoadData = ({ id }) => {
+  const onLoadData = ({ id }) =>
     getSysDeptTreelist({ deptId: id }).then(res => {
       if (res.code === 0) {
-        setDeptData(sysDeptData.concat(setTreeFormat(res.data)));
+        setDeptData(deptData.concat(setTreeFormat(res.data)));
       }
-      console.log(12333, sysDeptData.concat(setTreeFormat(res.data)));
     });
-  };
 
   const tProps = {
     treeData: deptData && deptData.length ? deptData : sysDeptData,
@@ -146,16 +146,8 @@ const UpdateForm = props => {
     style: {
       width: '100%',
     },
-    loadData: onLoadData,
   };
-  // treeDataSimpleMode
-  //       style={{ width: '100%' }}
-  //       value={this.state.value}
-  //       dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-  //       placeholder="Please select"
-  //       onChange={this.onChange}
-  //       loadData={this.onLoadData}
-  //       treeData={treeData}
+
   return (
     <>
       <Drawer
@@ -230,15 +222,12 @@ const UpdateForm = props => {
                 })}
             </Select>
           </Form.Item>
-          {sysDeptData && sysDeptData.length && (
+          {visible && sysDeptData && sysDeptData.length && (
             <div className={styles.treeBox}>
               <Row>
                 <Col span={14} push={4}>
-                  <TreeSelect
-                    {...tProps}
-                    treeData={deptData && deptData.length ? deptData : sysDeptData}
-                    treeDataSimpleMode
-                  />
+                  {/* <SelectTree sysDeptData={sysDeptData} /> */}
+                  <TreeSelect {...tProps} treeDataSimpleMode loadData={obj => onLoadData(obj)} />
                 </Col>
                 <Col span={4} pull={14}>
                   <div className={styles.treeName}>选择部门：</div>

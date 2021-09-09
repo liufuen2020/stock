@@ -166,7 +166,6 @@ const TableList = () => {
     <PageContainer>
       <ProTable
         actionRef={actionRef}
-        pagination={{ defaultPageSize: 10 }}
         rowKey={record => record.roleId}
         search={{
           labelWidth: 120,

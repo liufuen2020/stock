@@ -60,6 +60,13 @@ const Login = () => {
     }
   };
 
+  const fetchDictDatas = async () => {
+    const dictData = await initialState?.fetchDictData?.();
+    if (dictData) {
+      Local.set('dictData', dictData);
+      await setInitialState(s => ({ ...s, dictData }));
+    }
+  };
   const handleSubmit = async values => {
     setSubmitting(true);
     try {
@@ -89,6 +96,8 @@ const Login = () => {
           // 获取用户信息
           await fetchUserInfo();
           await fetchRoutes();
+          await fetchDictDatas();
+
           setTimeout(() => {
             history.push(redirect || '/');
           }, 50);

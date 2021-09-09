@@ -1,62 +1,41 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, message, Divider } from 'antd';
-import React, { useState, useRef, useEffect } from 'react';
-import { FormattedMessage } from 'umi';
+import { Button, message } from 'antd';
+import React, { useState, useRef } from 'react';
+import { FormattedMessage, useModel } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 import moment from 'moment';
-import { getList, removeField } from './api';
+import { formatDict } from '@/utils';
+import { getList } from './api';
 import UpdateForm from './components/UpdateForm';
-
-/**
- * @en-US Add node
- * @zh-CN 添加节点
- * @param fields
- */
-
-const getListData = async fields => {
-  const hide = message.loading('正在加载');
-  try {
-    const data = await getList({ ...fields });
-    hide();
-    if (data.code === 0) {
-      return { data: data.data.list, total: data.data.total };
-    }
-  } catch (error) {
-    hide();
-    message.error('请求失败，请重试');
-    return false;
-  }
-};
 
 const TableList = () => {
   const actionRef = useRef();
 
-  /**
-   *  Delete node
-   * @zh-CN 删除节点
-   *
-   * @param selectedRows
-   */
-  const handleRemove = async id => {
-    const hide = message.loading('正在删除');
+  const Model = useModel('@@initialState');
+  const dictData = Model.initialState?.dictData;
 
+  const [logDictData, setLogDictData] = useState();
+
+  /**
+   * @en-US Add node
+   * @zh-CN 添加节点
+   * @param fields
+   */
+
+  const getListData = async fields => {
     try {
-      await removeField(id);
-      hide();
-      message.success('删除成功！');
-      if (actionRef.current) {
-        actionRef.current.reload();
+      const data = await getList({ ...fields });
+      if (data.code === 0) {
+        setLogDictData(formatDict(dictData, 'business_type'));
+        return { data: data.data.list, total: data.data.total };
       }
-      return true;
+      message.error('请求失败，请重试');
     } catch (error) {
-      hide();
-      message.error('删除失败，请重试');
+      message.error('请求失败，请重试');
       return false;
     }
   };
-
-  useEffect(() => {}, []);
 
   // 更新数据 组件 ------------------------------------------------------------------
 
@@ -104,19 +83,45 @@ const TableList = () => {
       },
     },
     {
-      title: '字典名称',
-      dataIndex: 'dictLabel',
+      title: '用户名',
+      dataIndex: 'userName',
     },
     {
-      title: '字典值',
-      dataIndex: 'dictValue',
+      title: '部门名称',
+      dataIndex: 'deptName',
     },
     {
-      title: '字典类型',
-      dataIndex: 'dictType',
+      title: 'IP',
+      dataIndex: 'ip',
+    },
+    {
+      title: '日志ID',
+      dataIndex: 'id',
+    },
+    {
+      title: '相应时间（毫秒）',
+      dataIndex: 'responseTime',
+    },
+    {
+      title: '操作类型',
+      valueType: 'option',
+      dataIndex: 'businessType',
+      render: (_, record) => {
+        return (
+          <>
+            {logDictData.map(item => {
+              if (item.dictValue * 1 === record.businessType) {
+                return <span>{item.dictLabel}</span>;
+              }
+              return '';
+            })}
+          </>
+        );
+      },
     },
     {
       title: '创建时间',
+      valueType: 'option',
       dataIndex: 'createTime',
       render: (_, record) => {
         return <>{moment(record.createTime).format('YYYY-MM-DD')}</>;
@@ -130,11 +135,7 @@ const TableList = () => {
         const text = (
           <>
             <Button type="link" onClick={() => setUpdateForm(record)}>
-              编辑
-            </Button>
-            <Divider type="vertical" />
-            <Button type="link" onClick={() => handleRemove(record.dictCode)}>
-              删除
+              详情
             </Button>
           </>
         );
@@ -147,7 +148,7 @@ const TableList = () => {
       <ProTable
         headerTitle="表格查询"
         actionRef={actionRef}
-        rowKey={record => record.dictCode}
+        rowKey={record => record.id}
         search={{
           labelWidth: 120,
         }}

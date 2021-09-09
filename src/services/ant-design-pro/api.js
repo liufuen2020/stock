@@ -123,3 +123,11 @@ export async function asynchTree(params, options) {
     ...(options || {}),
   });
 }
+//  字典表
+export async function sysDictData(params, options) {
+  return request('/api/sysDictData/list', {
+    method: 'GET',
+    params: { ...params },
+    ...(options || {}),
+  });
+}

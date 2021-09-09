@@ -11,7 +11,7 @@ import { extend } from 'umi-request';
 // import { BookOutlined, LinkOutlined } from '@ant-design/icons';
 // import { smile, HeartOutlined } from '@ant-design/icons';
 import Local from '@/utils/local';
-import { currentUser, routes } from './services/ant-design-pro/api';
+import { currentUser, routes, sysDictData } from './services/ant-design-pro/api';
 
 const setList = arr => {
   const newTreeData = [];
@@ -84,23 +84,30 @@ export async function getInitialState() {
     return undefined;
   };
 
-  // const fetchCurrentRoute = async () => {
-  //   try {
-  //     const msg = await routes();
-  //     return msg.data;
-  //   } catch (error) {
-  //     history.push(loginPath);
-  //   }
-  //   return undefined;
-  // };
+  const fetchDictData = async () => {
+    try {
+      const msg = await sysDictData();
+      if (msg.code === 0) {
+        return msg.data;
+      }
+      message.error('获取字典表失败！');
+      return {};
+    } catch (error) {
+      history.push(loginPath);
+    }
+    return undefined;
+  };
 
   // 如果是登录页面，不执行
   if (history.location.pathname !== loginPath) {
-    const currentUserData = await fetchUserInfo();
-    const currentRoute = await fetchCurrentRoute();
+    const currentUserData = await fetchUserInfo(); // 当前用户
+    const currentRoute = await fetchCurrentRoute(); // 当前路由
+    const dictData = await fetchDictData(); // 字典表
+
     return {
       fetchUserInfo,
       fetchCurrentRoute,
+      dictData,
       currentUser: currentUserData,
       currentRoute,
       settings: {},
@@ -110,6 +117,7 @@ export async function getInitialState() {
   return {
     fetchUserInfo,
     fetchCurrentRoute,
+    fetchDictData,
     settings: {},
   };
 }

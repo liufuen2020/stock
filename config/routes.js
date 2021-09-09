@@ -70,6 +70,12 @@ export default [
         component: './DictData',
       },
       {
+        path: '/admin/log',
+        name: '日志管理',
+        icon: 'smile',
+        component: './log',
+      },
+      {
         component: './404',
       },
     ],
