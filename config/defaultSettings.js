@@ -11,6 +11,7 @@ const Settings = {
   menu: {
     locale: false,
   },
+
   pwa: false,
   logo: 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
   iconfontUrl: '',

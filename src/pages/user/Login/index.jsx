@@ -3,7 +3,7 @@ import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, message, Space, Tabs } from 'antd';
 import React, { useState, useEffect } from 'react';
 import ProForm, { ProFormCheckbox, ProFormText } from '@ant-design/pro-form';
-import { useIntl, Link, history, FormattedMessage, SelectLang, useModel } from 'umi';
+import { useIntl, history, FormattedMessage, SelectLang, useModel } from 'umi';
 import Footer from '@/components/Footer';
 import Local from '@/utils/local';
 import { login, getCaptcha } from '@/services/ant-design-pro/api';
@@ -127,17 +127,17 @@ const Login = () => {
       </div>
       <div className={styles.content}>
         <div className={styles.top}>
-          <div className={styles.header}>
+          {/* <div className={styles.header}>
             <Link to="/">
               <img alt="logo" className={styles.logo} src="/logo.svg" />
               <span className={styles.title}>Ant Design</span>
             </Link>
-          </div>
-          <div className={styles.desc}>
+          </div> */}
+          {/* <div className={styles.desc}>
             {intl.formatMessage({
               id: 'pages.layouts.userLayout.title',
             })}
-          </div>
+          </div> */}
         </div>
 
         <div className={styles.main}>
@@ -166,13 +166,13 @@ const Login = () => {
             }}
           >
             <Tabs activeKey={type} onChange={setType}>
-              <Tabs.TabPane
+              {/* <Tabs.TabPane
                 key="account"
                 tab={intl.formatMessage({
                   id: 'pages.login.accountLogin.tab',
                   defaultMessage: '账户密码登录',
                 })}
-              />
+              /> */}
               {/* <Tabs.TabPane
                 key="mobile"
                 tab={intl.formatMessage({
@@ -198,19 +198,11 @@ const Login = () => {
                     size: 'large',
                     prefix: <UserOutlined className={styles.prefixIcon} />,
                   }}
-                  placeholder={intl.formatMessage({
-                    id: 'pages.login.username.placeholder',
-                    defaultMessage: '用户名: admin or user',
-                  })}
+                  placeholder="请输入用户名"
                   rules={[
                     {
                       required: true,
-                      message: (
-                        <FormattedMessage
-                          id="pages.login.username.required"
-                          defaultMessage="请输入用户名!"
-                        />
-                      ),
+                      message: '请输入用户名!',
                     },
                   ]}
                 />
@@ -220,19 +212,11 @@ const Login = () => {
                     size: 'large',
                     prefix: <LockOutlined className={styles.prefixIcon} />,
                   }}
-                  placeholder={intl.formatMessage({
-                    id: 'pages.login.password.placeholder',
-                    defaultMessage: '密码: ant.design',
-                  })}
+                  placeholder="请输入密码"
                   rules={[
                     {
                       required: true,
-                      message: (
-                        <FormattedMessage
-                          id="pages.login.password.required"
-                          defaultMessage="请输入密码！"
-                        />
-                      ),
+                      message: '请输入密码！',
                     },
                   ]}
                 />

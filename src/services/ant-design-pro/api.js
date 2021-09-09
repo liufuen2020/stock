@@ -113,3 +113,13 @@ export async function routes(params, options) {
     ...(options || {}),
   });
 }
+
+//  行政区域
+
+export async function asynchTree(params, options) {
+  return request('/api/sysBranch/asynchTree', {
+    method: 'GET',
+    params: { ...params },
+    ...(options || {}),
+  });
+}

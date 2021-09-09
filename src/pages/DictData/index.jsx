@@ -4,19 +4,24 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FormattedMessage } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
-import { sysUserList, getRule, removeRule, getSysPost, getSysDeptTreelist } from './api';
+import moment from 'moment';
+import { getList, removeField } from './api';
 import UpdateForm from './components/UpdateForm';
 
 /**
- * @zh-CN 获取列表
+ * @en-US Add node
+ * @zh-CN 添加节点
  * @param fields
  */
 
-const getSysUserList = async fields => {
+const getListData = async fields => {
+  const hide = message.loading('正在加载');
   try {
-    const data = await sysUserList({ ...fields });
+    const data = await getList({ ...fields });
+    hide();
     return { data: data.data.list };
   } catch (error) {
+    hide();
     message.error('请求失败，请重试');
     return false;
   }
@@ -24,65 +29,6 @@ const getSysUserList = async fields => {
 
 const TableList = () => {
   const actionRef = useRef();
-  const [type, setType] = useState();
-
-  const [roleList, setRoleList] = useState();
-  const [sysPostList, setSysPostList] = useState();
-  const [sysDeptData, setSysDeptData] = useState();
-  /**
-   * @zh-CN 获取角色
-   *
-   * @param
-   */
-  const getRoleList = () => {
-    getRule().then(res => {
-      if (res.code === 0) {
-        setRoleList(res.data || []);
-      }
-    });
-  };
-
-  /**
-   * @zh-CN 获取岗位
-   *
-   * @param
-   */
-  const getSysPostData = () => {
-    getSysPost().then(res => {
-      if (res.code === 0) {
-        setSysPostList(res.data || []);
-      }
-    });
-  };
-
-  const setTreeFormat = data => {
-    const newData = [];
-    data.map(item => {
-      const obj = {
-        id: item.deptId,
-        value: item.deptId,
-        title: item.deptName,
-        pId: item.parentId,
-        isLeaf: false,
-      };
-      newData.push(obj);
-      return '';
-    });
-    return newData;
-  };
-
-  /**
-   * @zh-CN 获取部门
-   *
-   * @param
-   */
-  const getSysDeptTreelistData = () => {
-    getSysDeptTreelist().then(res => {
-      if (res.code === 0) {
-        setSysDeptData(setTreeFormat(res.data || []));
-      }
-    });
-  };
 
   /**
    *  Delete node
@@ -94,7 +40,7 @@ const TableList = () => {
     const hide = message.loading('正在删除');
 
     try {
-      await removeRule(id);
+      await removeField(id);
       hide();
       message.success('删除成功！');
       if (actionRef.current) {
@@ -108,11 +54,11 @@ const TableList = () => {
     }
   };
 
-  useEffect(() => {
-    getRoleList();
-    getSysPostData();
-    getSysDeptTreelistData();
-  }, []); // 更新数据 组件 ------------------------------------------------------------------
+  useEffect(() => {}, []);
+
+  // 更新数据 组件 ------------------------------------------------------------------
+
+  const [type, setType] = useState();
 
   const [updateModalVisible, handleUpdateModalVisible] = useState(false);
   const [updataData, setUpdataData] = useState({});
@@ -139,6 +85,7 @@ const TableList = () => {
     setUpdataData({});
     handleUpdateModalVisible(true);
   };
+  // ----------------------------------------------结束------------------------------------------------------
 
   /**
    * @en-US International configuration
@@ -147,20 +94,23 @@ const TableList = () => {
 
   const columns = [
     {
-      title: '用户名',
-      dataIndex: 'nickName',
+      title: '字典名称',
+      dataIndex: 'dictLabel',
     },
     {
-      title: '账号',
-      dataIndex: 'userName',
+      title: '字典值',
+      dataIndex: 'dictValue',
     },
     {
-      title: '手机号',
-      dataIndex: 'phonenumber',
+      title: '字典类型',
+      dataIndex: 'dictType',
     },
     {
-      title: 'email',
-      dataIndex: 'email',
+      title: '创建时间',
+      dataIndex: 'createTime',
+      render: (_, record) => {
+        return <>{moment(record.createTime).format('YYYY-MM-DD')}</>;
+      },
     },
     {
       title: '操作',
@@ -173,7 +123,7 @@ const TableList = () => {
               编辑
             </Button>
             <Divider type="vertical" />
-            <Button type="link" onClick={() => handleRemove(record.userId)}>
+            <Button type="link" onClick={() => handleRemove(record.dictCode)}>
               删除
             </Button>
           </>
@@ -187,7 +137,7 @@ const TableList = () => {
       <ProTable
         headerTitle="表格查询"
         actionRef={actionRef}
-        rowKey={record => record.userId}
+        rowKey={record => record.dictCode}
         search={{
           labelWidth: 120,
         }}
@@ -196,7 +146,7 @@ const TableList = () => {
             <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
           </Button>,
         ]}
-        request={getSysUserList}
+        request={getListData}
         columns={columns}
       />
       <UpdateForm
@@ -205,9 +155,6 @@ const TableList = () => {
         data={updataData}
         onSuccess={updataSuccess}
         type={type}
-        sysDeptData={sysDeptData}
-        roleList={roleList}
-        sysPostList={sysPostList}
       />
     </PageContainer>
   );

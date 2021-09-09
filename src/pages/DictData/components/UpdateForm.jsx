@@ -12,7 +12,9 @@ const UpdateForm = props => {
 
   // 详情
   const getDetailData = () => {
-    getDetail(data.postId).then(res => {
+    const hide = message.loading('正在详情');
+    getDetail(data.dictCode).then(res => {
+      hide();
       if (res.code === 0) {
         form.setFieldsValue({ ...res.data, ...data });
       } else {
@@ -44,7 +46,7 @@ const UpdateForm = props => {
   const updataData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    upadataField({ ...values, postId: data.postId }).then(res => {
+    upadataField({ ...values, dictCode: data.dictCode }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -119,16 +121,19 @@ const UpdateForm = props => {
         }
       >
         <Form {...formItemLayout} name="control-ref" form={form}>
-          <Form.Item label="岗位名称" name="postName" rules={[{ required: true }]}>
+          <Form.Item label="字典名称" name="dictLabel" rules={[{ required: true }]}>
             <Input maxLength={20} />
           </Form.Item>{' '}
-          <Form.Item label="岗位编码" name="postCode" rules={[{ required: true }]}>
+          <Form.Item label="字典值" name="dictValue" rules={[{ required: true }]}>
+            <Input maxLength={20} />
+          </Form.Item>{' '}
+          <Form.Item label="字典类型" name="dictType" rules={[{ required: true }]}>
             <Input maxLength={20} />
           </Form.Item>
-          <Form.Item width="xs" name="postSort" label="显示顺序" rules={[{ required: true }]}>
+          <Form.Item width="xs" name="dictSort" label="显示顺序" rules={[{ required: true }]}>
             <InputNumber min={0} max={1000} />
           </Form.Item>
-          <Form.Item name="gender" label="岗位状态">
+          <Form.Item name="status" label="岗位状态">
             <Radio.Group>
               <Radio value="0">正常</Radio>
               <Radio value="1">停用</Radio>

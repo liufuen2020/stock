@@ -121,7 +121,7 @@ const UpdateForm = props => {
       <Drawer
         getContainer={false}
         width={640}
-        title={type === 'updata' ? '修改账号' : '添加账号'}
+        title={type === 'updata' ? '修改' : '添加'}
         visible={visible}
         onClose={modelClose}
         maskClosable={false}

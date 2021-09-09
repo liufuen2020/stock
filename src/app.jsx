@@ -2,7 +2,7 @@ import { PageLoading } from '@ant-design/pro-layout';
 import { history } from 'umi';
 
 import React from 'react';
-import { notification } from 'antd';
+import { notification, message } from 'antd';
 import * as Icon from '@ant-design/icons';
 import RightContent from '@/components/RightContent';
 import Footer from '@/components/Footer';
@@ -19,7 +19,6 @@ const setList = arr => {
     const obj = {
       path: item.path,
       name: item.menuName,
-
       component: item.component,
     };
 
@@ -29,7 +28,10 @@ const setList = arr => {
     if (item.children && item.children.length) {
       obj.routes = setList(item.children);
     }
-    newTreeData.push(obj);
+    if (item.menuType === 'C') {
+      newTreeData.push(obj);
+    }
+
     return '';
   });
   return newTreeData;
@@ -82,6 +84,16 @@ export async function getInitialState() {
     return undefined;
   };
 
+  // const fetchCurrentRoute = async () => {
+  //   try {
+  //     const msg = await routes();
+  //     return msg.data;
+  //   } catch (error) {
+  //     history.push(loginPath);
+  //   }
+  //   return undefined;
+  // };
+
   // 如果是登录页面，不执行
   if (history.location.pathname !== loginPath) {
     const currentUserData = await fetchUserInfo();
@@ -105,7 +117,6 @@ export async function getInitialState() {
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 
 export const layout = ({ initialState }) => {
-  console.log(123, initialState);
   return {
     rightContentRender: () => <RightContent />,
     disableContentMargin: false,
@@ -180,7 +191,10 @@ request.interceptors.response.use(async res => {
   if (response.status === 401) {
     // 跳转登录
     Local.clear();
-    history.push(loginPath);
+    message.error('token过期，请重新登录');
+    setTimeout(() => {
+      history.push(loginPath);
+    }, 1500);
     return false;
   }
 

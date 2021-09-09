@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { message, Drawer, Form, Input, Button, Radio, Select } from 'antd';
-import { upadataUser, addUser, getUserDetail } from '../api';
+import { message, Drawer, Form, Input, Button, Radio, Select, Row, Col, TreeSelect } from 'antd';
+import { upadataUser, addUser, getUserDetail, getSysDeptTreelist } from '../api';
+
+import styles from '../index.less';
 
 const { Option } = Select;
 
 const UpdateForm = props => {
   // 结构化数据
-  const { visible, onCancel, onSuccess, roleList, sysPostList, data, type } = props;
+  const { visible, onCancel, onSuccess, roleList, sysPostList, data, type, sysDeptData } = props;
+
+  console.log(sysDeptData);
 
   // 初始化 form
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [tvalue, setTValue] = useState();
+
+  const [deptData, setDeptData] = useState();
 
   // 详情
   const getDetail = () => {
@@ -95,12 +102,66 @@ const UpdateForm = props => {
     onCancel(false);
   };
 
+  // 填充字段数据
+
+  // const { SHOW_PARENT } = TreeSelect;
+  const treeDataChange = value => {
+    setTValue(value);
+  };
+
+  const setTreeFormat = datas => {
+    const newData = [];
+    datas.map(item => {
+      const obj = {
+        id: item.deptId,
+        value: item.deptId,
+        pId: item.parentId,
+        title: item.deptName,
+        isLeaf: false,
+      };
+      newData.push(obj);
+      return '';
+    });
+    return newData;
+  };
+
+  const onLoadData = ({ id }) => {
+    getSysDeptTreelist({ deptId: id }).then(res => {
+      if (res.code === 0) {
+        setDeptData(sysDeptData.concat(setTreeFormat(res.data)));
+      }
+      console.log(12333, sysDeptData.concat(setTreeFormat(res.data)));
+    });
+  };
+
+  const tProps = {
+    treeData: deptData && deptData.length ? deptData : sysDeptData,
+    value: tvalue,
+    onChange: value => {
+      treeDataChange(value);
+    },
+    // treeCheckable: false,
+    // showCheckedStrategy: SHOW_PARENT,
+    placeholder: '',
+    style: {
+      width: '100%',
+    },
+    loadData: onLoadData,
+  };
+  // treeDataSimpleMode
+  //       style={{ width: '100%' }}
+  //       value={this.state.value}
+  //       dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+  //       placeholder="Please select"
+  //       onChange={this.onChange}
+  //       loadData={this.onLoadData}
+  //       treeData={treeData}
   return (
     <>
       <Drawer
         getContainer={false}
         width={640}
-        title={type === 'updata' ? '修改账号' : '添加账号'}
+        title={type === 'updata' ? '修改' : '添加'}
         visible={visible}
         onClose={modelClose}
         maskClosable={false}
@@ -169,6 +230,22 @@ const UpdateForm = props => {
                 })}
             </Select>
           </Form.Item>
+          {sysDeptData && sysDeptData.length && (
+            <div className={styles.treeBox}>
+              <Row>
+                <Col span={14} push={4}>
+                  <TreeSelect
+                    {...tProps}
+                    treeData={deptData && deptData.length ? deptData : sysDeptData}
+                    treeDataSimpleMode
+                  />
+                </Col>
+                <Col span={4} pull={14}>
+                  <div className={styles.treeName}>选择部门：</div>
+                </Col>
+              </Row>
+            </div>
+          )}
           <Form.Item label="备注" name="remark">
             <Input.TextArea maxLength={200} />
           </Form.Item>

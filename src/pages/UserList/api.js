@@ -67,3 +67,12 @@ export async function getSysPost(params, options) {
     ...(options || {}),
   });
 }
+
+// 部门列表
+export async function getSysDeptTreelist(params, options) {
+  return request('/api/sysDept/asynchTree', {
+    method: 'GET',
+    params: { ...params },
+    ...(options || {}),
+  });
+}

@@ -1,8 +1,9 @@
 import { Button, message, Table, Divider } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { meunTree } from '@/services/ant-design-pro/api';
-import { removeMenu, getMenu } from './api';
+import moment from 'moment';
+import { asynchTree } from '@/services/ant-design-pro/api';
+import { removeMenu, getList, treelist } from './api';
 import UpdateForm from './components/UpdateForm';
 import styles from './index.less';
 
@@ -26,9 +27,9 @@ const setListMenu = arr => {
   const newTreeData = [];
   arr.map(res => {
     const obj = {
-      title: res.menuName,
-      value: res.menuId,
-      key: res.menuId,
+      title: res.deptName,
+      value: res.deptId,
+      key: res.deptId,
     };
 
     if (res.children && res.children.length) {
@@ -39,14 +40,16 @@ const setListMenu = arr => {
   });
   return newTreeData;
 };
+
 const TableList = () => {
   const [menuData, setMenuData] = useState();
   const [treeData, setTreeData] = useState([]);
 
+  const [asynchTreeData, setAsynchTreeData] = useState([]);
   // console.log(123, treeData);
 
   const getMenuList = () => {
-    meunTree().then(res => {
+    treelist().then(res => {
       if (res.code === 0 && res.data && res.data.length) {
         setTreeData(setListMenu(res.data));
       } else {
@@ -55,15 +58,26 @@ const TableList = () => {
     });
   };
 
+  const getAsynchTree = () => {
+    asynchTree().then(res => {
+      if (res.code === 0 && res.data && res.data.length) {
+        setAsynchTreeData(setListMenu(res.data));
+      } else {
+        message.error(res.msg || '行政区域加载失败');
+      }
+    });
+  };
+
   //  加载主数据
   const getData = () => {
     const hide = message.loading('正在加载数据');
-    getMenu().then(res => {
+    getList().then(res => {
       hide();
       if (res.code === 0) {
         const newData = setList(res.data || []);
         setMenuData(newData);
         getMenuList();
+        getAsynchTree();
       }
     });
   };
@@ -103,7 +117,9 @@ const TableList = () => {
   // ----------------------------------------------结束------------------------------------------------------
 
   const handleRemove = id => {
+    const hide = message.loading('正在删除');
     removeMenu(id).then(res => {
+      hide();
       if (res.code === 0) {
         message.success('删除成功！');
         getData();
@@ -127,24 +143,31 @@ const TableList = () => {
       },
     },
     {
-      title: '菜单名称',
-      dataIndex: 'menuName',
+      title: '部门名称',
+      dataIndex: 'deptName',
     },
     {
-      title: '路径',
-      dataIndex: 'path',
+      title: '领导',
+      dataIndex: 'leader',
     },
     {
-      title: '类型',
-      dataIndex: 'menuType',
+      title: '手机号',
+      dataIndex: 'phone',
     },
     {
-      title: '菜单ID',
-      dataIndex: 'menuId',
+      title: '部门ID',
+      dataIndex: 'deptId',
     },
     {
       title: '父级ID',
       dataIndex: 'parentId',
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createTime',
+      render: (_, record) => {
+        return <>{moment(record.createTime).format('YYYY-MM-DD')}</>;
+      },
     },
     {
       title: '操作',
@@ -157,7 +180,7 @@ const TableList = () => {
               编辑
             </Button>
             <Divider type="vertical" />
-            <Button type="link" onClick={() => handleRemove(record.menuId)}>
+            <Button type="link" onClick={() => handleRemove(record.deptId)}>
               删除
             </Button>
           </>
@@ -173,13 +196,14 @@ const TableList = () => {
           添加菜单
         </Button>
       </div>
-      <Table columns={columns} dataSource={menuData} rowKey={record => record.menuId} />
+      <Table columns={columns} dataSource={menuData} rowKey={record => record.deptId} />
 
       <UpdateForm
         visible={updateModalVisible}
         onCancel={closeUpdateForm}
         data={updataData}
         menuData={treeData}
+        asynchTreeData={asynchTreeData}
         onSuccess={updataSuccess}
         type={type}
       />

@@ -28,6 +28,7 @@ export default [
     path: '/admin',
     name: '授权管理',
     icon: 'crown',
+    hidden: true,
     // access: 'canAdmin',
     // component: './TableList',
     routes: [
@@ -47,6 +48,7 @@ export default [
         path: '/admin/menu',
         name: '菜单管理',
         icon: 'smile',
+        hidden: true,
         component: './MenuList',
       },
       {
@@ -56,14 +58,40 @@ export default [
         component: './sysPost',
       },
       {
+        path: '/admin/dept',
+        name: '部门管理',
+        icon: 'smile',
+        component: './dept',
+      },
+      {
+        path: '/admin/dict',
+        name: '字典管理',
+        icon: 'smile',
+        component: './DictData',
+      },
+      {
         component: './404',
       },
     ],
   },
-
+  {
+    path: '/system',
+    name: '授权管理',
+    routes: [
+      {
+        path: '/system/online',
+        name: '角色管理',
+        icon: 'smile',
+        component: './system/online',
+      },
+      {
+        component: './404',
+      },
+    ],
+  },
   {
     path: '/',
-    redirect: '/welcome',
+    redirect: '/admin/role',
   },
   {
     component: './404',
