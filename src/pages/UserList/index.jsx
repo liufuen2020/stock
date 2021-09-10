@@ -185,7 +185,6 @@ const TableList = () => {
   return (
     <PageContainer>
       <ProTable
-        headerTitle="表格查询"
         actionRef={actionRef}
         rowKey={record => record.userId}
         search={{

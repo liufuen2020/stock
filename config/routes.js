@@ -81,6 +81,10 @@ export default [
     ],
   },
   {
+    path: '/account/settings',
+    component: './settings',
+  },
+  {
     path: '/system',
     name: '授权管理',
     routes: [

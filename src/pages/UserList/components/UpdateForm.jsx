@@ -175,15 +175,12 @@ const UpdateForm = props => {
         <Form {...formItemLayout} name="control-ref" form={form}>
           <Form.Item label="用户昵称" name="nickName" rules={[{ required: true }]}>
             <Input maxLength={20} />
-          </Form.Item>{' '}
-          <Form.Item label="头像" name="avatar">
-            <Input maxLength={20} />
           </Form.Item>
           <Form.Item name="gender" label="性别">
             <Radio.Group>
-              <Radio value="0">男</Radio>
-              <Radio value="1">女</Radio>
-              <Radio value="2">未知</Radio>
+              <Radio value="1">男</Radio>
+              <Radio value="2">女</Radio>
+              <Radio value="3">未知</Radio>
             </Radio.Group>
           </Form.Item>
           <Form.Item label="用户账号" name="userName" rules={[{ required: true }]}>

@@ -128,7 +128,7 @@ const UpdateForm = props => {
           <Form.Item width="xs" name="postSort" label="显示顺序" rules={[{ required: true }]}>
             <InputNumber min={0} max={1000} />
           </Form.Item>
-          <Form.Item name="gender" label="岗位状态">
+          <Form.Item name="status" label="岗位状态">
             <Radio.Group>
               <Radio value="0">正常</Radio>
               <Radio value="1">停用</Radio>
