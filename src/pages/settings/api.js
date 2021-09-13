@@ -33,7 +33,7 @@ export async function addField(body, options) {
 }
 
 export async function upadataField(body, options) {
-  return request('/api/sysPost/post', {
+  return request('/api/sysPerson/person', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -43,10 +43,24 @@ export async function upadataField(body, options) {
   });
 }
 
-/** 删除  */
+export async function upadataPassword(body, options) {
+  return request('/api/sysPerson/password', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
 
-export async function removeField(options) {
-  return request(`/api/sysPost/post/${options}`, {
-    method: 'DELETE',
+export async function addAvator(body, options) {
+  return request('/api/sysPerson/avator', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
   });
 }

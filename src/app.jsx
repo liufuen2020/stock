@@ -28,7 +28,7 @@ const setList = arr => {
     if (item.children && item.children.length) {
       obj.routes = setList(item.children);
     }
-    if (item.menuType === 'C') {
+    if (item.menuType === 'C' || item.menuType === 'M') {
       newTreeData.push(obj);
     }
 

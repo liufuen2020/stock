@@ -3,10 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import moment from 'moment';
 import { asynchTree } from '@/services/ant-design-pro/api';
-import { removeMenu, getList, treelist } from './api';
+import { removeMenu, getList } from './api';
+import { getSysDeptTreelist } from '../UserList/api';
+
 import UpdateForm from './components/UpdateForm';
 import styles from './index.less';
 
+// 主数据格式化
 const setList = arr => {
   const newTreeData = [];
   arr.map(item => {
@@ -23,45 +26,53 @@ const setList = arr => {
   return newTreeData;
 };
 
-const setListMenu = arr => {
-  const newTreeData = [];
-  arr.map(res => {
+// 部门格式化
+const setTreeFormat = data => {
+  const newData = [];
+  data.map(item => {
     const obj = {
-      title: res.deptName,
-      value: res.deptId,
-      key: res.deptId,
+      id: item.deptId,
+      value: item.deptId,
+      title: item.deptName,
+      pId: item.parentId,
+      isLeaf: false,
     };
-
-    if (res.children && res.children.length) {
-      obj.children = setListMenu(res.children);
-    }
-    newTreeData.push(obj);
+    newData.push(obj);
     return '';
   });
-  return newTreeData;
+  return newData;
 };
 
+/**
+ * @zh-CN 主类
+ *
+ * @param
+ */
 const TableList = () => {
   const [menuData, setMenuData] = useState();
-  const [treeData, setTreeData] = useState([]);
 
   const [asynchTreeData, setAsynchTreeData] = useState([]);
-  // console.log(123, treeData);
 
-  const getMenuList = () => {
-    treelist().then(res => {
-      if (res.code === 0 && res.data && res.data.length) {
-        setTreeData(setListMenu(res.data));
-      } else {
-        message.error(res.msg || '菜单加载失败');
+  const [sysDeptData, setSysDeptData] = useState();
+
+  /**
+   * @zh-CN 获取部门树
+   *
+   * @param
+   */
+  const getSysDeptTreelistData = () => {
+    getSysDeptTreelist().then(res => {
+      if (res.code === 0) {
+        setSysDeptData(setTreeFormat(res.data || []));
       }
     });
   };
 
+  // 行政区域加载
   const getAsynchTree = () => {
     asynchTree().then(res => {
       if (res.code === 0 && res.data && res.data.length) {
-        setAsynchTreeData(setListMenu(res.data));
+        setAsynchTreeData(res.data);
       } else {
         message.error(res.msg || '行政区域加载失败');
       }
@@ -76,7 +87,7 @@ const TableList = () => {
       if (res.code === 0) {
         const newData = setList(res.data || []);
         setMenuData(newData);
-        getMenuList();
+        getSysDeptTreelistData(); // 部门数据
         getAsynchTree();
       }
     });
@@ -193,7 +204,7 @@ const TableList = () => {
     <PageContainer>
       <div className={styles.btnBox}>
         <Button type="primary" onClick={addData}>
-          添加菜单
+          添加部门
         </Button>
       </div>
       <Table columns={columns} dataSource={menuData} rowKey={record => record.deptId} />
@@ -202,7 +213,7 @@ const TableList = () => {
         visible={updateModalVisible}
         onCancel={closeUpdateForm}
         data={updataData}
-        menuData={treeData}
+        sysDeptData={sysDeptData}
         asynchTreeData={asynchTreeData}
         onSuccess={updataSuccess}
         type={type}

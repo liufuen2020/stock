@@ -98,10 +98,10 @@ const TableList = () => {
       title: '日志ID',
       dataIndex: 'id',
     },
-    {
-      title: '相应时间（毫秒）',
-      dataIndex: 'responseTime',
-    },
+    // {
+    //   title: '相应时间（毫秒）',
+    //   dataIndex: 'responseTime',
+    // },
     {
       title: '操作类型',
       valueType: 'option',

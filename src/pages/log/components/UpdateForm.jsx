@@ -61,13 +61,16 @@ const UpdateForm = props => {
       >
         <Form {...formItemLayout} name="control-ref" form={form}>
           <Form.Item label="methodTarget" name="methodTarget">
-            <Input.TextArea maxLength={400} readonly rows={3} />
+            <Input.TextArea maxLength={400} reaDonly rows={3} />
           </Form.Item>
           <Form.Item label="param" name="param">
-            <Input.TextArea maxLength={400} readonly rows={6} />
+            <Input.TextArea maxLength={400} reaDonly rows={6} />
           </Form.Item>
           <Form.Item label="result" name="result">
-            <Input.TextArea maxLength={400} readonly rows={3} />
+            <Input.TextArea maxLength={400} reaDonly rows={3} />
+          </Form.Item>
+          <Form.Item label="errorMsg" name="errorMsg">
+            <Input.TextArea maxLength={400} reaDonly rows={3} />
           </Form.Item>
         </Form>
       </Drawer>

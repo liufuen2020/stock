@@ -72,7 +72,7 @@ const TableList = () => {
   };
 
   /**
-   * @zh-CN 获取部门
+   * @zh-CN 获取部门树
    *
    * @param
    */

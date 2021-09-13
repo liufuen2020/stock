@@ -29,7 +29,7 @@ const UpdateForm = props => {
   // 结构化数据
   const { visible, onCancel, onSuccess, data, type, menuData } = props;
 
-  const [menuType, setMenuType] = useState();
+  const [menuType, setMenuType] = useState('M');
 
   // 初始化 form
   const [form] = Form.useForm();
@@ -236,6 +236,7 @@ const UpdateForm = props => {
           <Form.Item name="menuType" label="菜单类型" rules={[{ required: true }]}>
             <Radio.Group>
               {/* <Radio value="M">目录</Radio> */}
+              <Radio value="M">模块</Radio>
               <Radio value="C">菜单</Radio>
               <Radio value="F">按钮</Radio>
             </Radio.Group>
@@ -248,6 +249,12 @@ const UpdateForm = props => {
           <Form.Item label="权限字符" name="perms">
             <Input maxLength={20} />
           </Form.Item>
+
+          {menuType === 'M' && (
+            <Form.Item width="xs" name="icon" label="菜单图标" rules={[{ required: true }]}>
+              <Input maxLength={20} readOnly="readonly" onClick={selectIconLayer} />
+            </Form.Item>
+          )}
           {menuType === 'C' && (
             <div>
               <Form.Item name="visible" label="显示状态">
@@ -255,9 +262,6 @@ const UpdateForm = props => {
                   <Radio value="0">显示</Radio>
                   <Radio value="1">隐藏</Radio>
                 </Radio.Group>
-              </Form.Item>
-              <Form.Item width="xs" name="icon" label="菜单图标" rules={[{ required: true }]}>
-                <Input maxLength={20} readOnly="readonly" onClick={selectIconLayer} />
               </Form.Item>
               <Form.Item label="路由地址" name="path" rules={[{ required: true }]}>
                 <Input maxLength={20} />

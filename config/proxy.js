@@ -11,6 +11,7 @@ export default {
     '/api/': {
       target: 'http://localhost:8088',
       // target: 'http://192.168.4.249:8088',
+      // target: 'http://192.168.5.182:8088',
       // target: 'http://192.168.5.233:8088',
       changeOrigin: true,
       pathRewrite: {

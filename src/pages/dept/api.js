@@ -46,13 +46,3 @@ export async function removeMenu(options) {
     method: 'DELETE',
   });
 }
-
-// 部门树
-export async function treelist(params, options) {
-  // return request('/api/sysDept/treelist', {
-  return request('/api/sysDept/list', {
-    method: 'GET',
-    params: { ...params },
-    ...(options || {}),
-  });
-}
