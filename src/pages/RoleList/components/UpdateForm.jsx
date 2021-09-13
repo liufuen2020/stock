@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { message, Form, Input, InputNumber, Row, Col, TreeSelect, Drawer, Button } from 'antd';
+import {
+  message,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  Col,
+  TreeSelect,
+  Drawer,
+  Button,
+  Radio,
+} from 'antd';
 import { upadataRule, addRule, getRuleDetail } from '@/services/ant-design-pro/api';
 import styles from '../index.less';
 
@@ -160,6 +171,12 @@ const UpdateForm = props => {
               </Col>
             </Row>
           </div>
+          <Form.Item name="status" label="状态">
+            <Radio.Group>
+              <Radio value="1">正常</Radio>
+              <Radio value="2">停用</Radio>
+            </Radio.Group>
+          </Form.Item>
           <Form.Item label="备注" name="remark">
             <Input.TextArea maxLength={200} />
           </Form.Item>
