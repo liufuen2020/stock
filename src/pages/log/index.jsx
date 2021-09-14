@@ -1,7 +1,6 @@
-import { PlusOutlined } from '@ant-design/icons';
 import { Button, message } from 'antd';
 import React, { useState, useRef } from 'react';
-import { FormattedMessage, useModel } from 'umi';
+import { useModel } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 import moment from 'moment';
@@ -60,12 +59,6 @@ const TableList = () => {
     }
   };
 
-  // 添加角色
-  const addUser = () => {
-    setType('add');
-    setUpdataData({});
-    handleUpdateModalVisible(true);
-  };
   // ----------------------------------------------结束------------------------------------------------------
 
   /**
@@ -151,11 +144,7 @@ const TableList = () => {
         search={{
           labelWidth: 120,
         }}
-        toolBarRender={() => [
-          <Button type="primary" key="primary" onClick={addUser}>
-            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
-          </Button>,
-        ]}
+        toolBarRender={() => []}
         request={getListData}
         columns={columns}
       />
