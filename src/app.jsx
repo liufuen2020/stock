@@ -115,9 +115,9 @@ export async function getInitialState() {
   }
 
   return {
-    fetchUserInfo,
-    fetchCurrentRoute,
-    fetchDictData,
+    // fetchUserInfo,
+    // fetchCurrentRoute,
+    // fetchDictData,
     settings: {},
   };
 }

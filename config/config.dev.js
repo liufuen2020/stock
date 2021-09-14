@@ -12,4 +12,8 @@ export default defineConfig({
     babelPlugins: [],
     babelOptions: {},
   },
+  define: {
+    baseUrl: 'http://localhost:8088',
+    API_PREFIX: 'a',
+  },
 });

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 // import moment from 'moment';
 import local from '@/utils/local';
+
 import { getList, upadataField, upadataPassword } from './api';
 import styles from './index.less';
 
@@ -97,8 +98,10 @@ const TableList = () => {
     multiple: true,
   };
 
-  const avatarImg = `http://localhost:8088${avatar}`;
-  const newAvatarImg = `http://localhost:8088${newAvatar}`;
+  // eslint-disable-next-line no-undef
+  const avatarImg = `${baseUrl}${avatar}`;
+  // eslint-disable-next-line no-undef
+  const newAvatarImg = `${baseUrl}${newAvatar}`;
 
   return (
     <PageContainer>
@@ -110,7 +113,8 @@ const TableList = () => {
                 <Button style={{ backgroundImage: `url(${avatarImg})` }}> </Button>
               </div>
               <p>
-                部门<span>{detailData.deptName || '--'}</span>
+                部门
+                <span>{detailData.deptName || '--'}</span>
               </p>
               <p>
                 昵称<span>{detailData.nickName || '--'}</span>

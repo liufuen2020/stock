@@ -99,7 +99,8 @@ const Login = () => {
           await fetchDictDatas();
 
           setTimeout(() => {
-            history.push(redirect || '/');
+            // history.push(redirect || '/');
+            window.location.href = redirect || '/';
           }, 50);
 
           // // 获取路由
