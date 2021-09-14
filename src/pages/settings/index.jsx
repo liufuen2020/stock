@@ -87,7 +87,8 @@ const TableList = () => {
       Authorization: `Bearer ${accessToken}`,
     },
     showUploadList: false,
-    action: '/api/sysPerson/avatar',
+    // eslint-disable-next-line no-undef
+    action: `${API_PREFIX}/sysPerson/avatar`,
     onChange: info => {
       setLoading(true);
       if (info.file && info.file.response && info.file.response.code === 0) {

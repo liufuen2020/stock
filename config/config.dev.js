@@ -14,6 +14,6 @@ export default defineConfig({
   },
   define: {
     baseUrl: 'http://localhost:8088',
-    API_PREFIX: 'a',
+    API_PREFIX: '/api',
   },
 });

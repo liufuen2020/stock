@@ -1,0 +1,9 @@
+// https://umijs.org/config/
+import { defineConfig } from 'umi';
+
+export default defineConfig({
+  define: {
+    baseUrl: '',
+    API_PREFIX: '',
+  },
+});

@@ -71,5 +71,6 @@ export default defineConfig({
   exportStatic: {},
   define: {
     baseUrl: '',
+    API_PREFIX: '',
   },
 });
