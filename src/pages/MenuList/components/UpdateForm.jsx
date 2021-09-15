@@ -234,7 +234,7 @@ const UpdateForm = props => {
             <Input maxLength={20} allowClear />
           </Form.Item>
           <Form.Item name="menuType" label="菜单类型" rules={[{ required: true }]}>
-            <Radio.Group allowClear>
+            <Radio.Group>
               {/* <Radio value="M">目录</Radio> */}
               <Radio value="M">模块</Radio>
               <Radio value="C">菜单</Radio>
@@ -251,9 +251,14 @@ const UpdateForm = props => {
           </Form.Item>
 
           {menuType === 'M' && (
-            <Form.Item width="xs" name="icon" label="菜单图标" rules={[{ required: true }]}>
-              <Input maxLength={20} readOnly="readonly" onClick={selectIconLayer} />
-            </Form.Item>
+            <>
+              <Form.Item label="路由地址" name="path" rules={[{ required: true }]}>
+                <Input maxLength={20} allowClear />
+              </Form.Item>
+              <Form.Item width="xs" name="icon" label="菜单图标" rules={[{ required: true }]}>
+                <Input maxLength={20} readOnly="readonly" onClick={selectIconLayer} />
+              </Form.Item>
+            </>
           )}
           {menuType === 'C' && (
             <div>
@@ -268,8 +273,8 @@ const UpdateForm = props => {
               </Form.Item>
               <Form.Item name="status" label="菜单状态">
                 <Radio.Group>
-                  <Radio value="1">正常</Radio>
-                  <Radio value="2">停用</Radio>
+                  <Radio value={0}>正常</Radio>
+                  <Radio value={1}>停用</Radio>
                 </Radio.Group>
               </Form.Item>
               <Form.Item label="备注" name="remark">

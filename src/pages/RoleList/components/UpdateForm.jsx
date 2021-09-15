@@ -173,8 +173,8 @@ const UpdateForm = props => {
           </div>
           <Form.Item name="status" label="状态">
             <Radio.Group>
-              <Radio value="1">正常</Radio>
-              <Radio value="2">停用</Radio>
+              <Radio value={0}>正常</Radio>
+              <Radio value={1}>停用</Radio>
             </Radio.Group>
           </Form.Item>
           <Form.Item label="备注" name="remark" allowClear>

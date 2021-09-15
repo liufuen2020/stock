@@ -86,11 +86,11 @@ export default [
   },
   {
     path: '/system',
-    name: '授权管理',
+    name: '监控管理',
     routes: [
       {
         path: '/system/online',
-        name: '角色管理',
+        name: '用户监控',
         icon: 'smile',
         component: './system/online',
       },
