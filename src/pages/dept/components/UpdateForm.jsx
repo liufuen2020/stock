@@ -251,7 +251,12 @@ const UpdateForm = props => {
             <Row>
               <Col span={14} push={4}>
                 {visible && sysDeptData && sysDeptData.length && (
-                  <TreeSelect {...tProps} treeDataSimpleMode loadData={obj => onLoadData(obj)} />
+                  <TreeSelect
+                    {...tProps}
+                    treeDataSimpleMode
+                    loadData={obj => onLoadData(obj)}
+                    allowClear
+                  />
                 )}
               </Col>
               <Col span={4} pull={14}>
@@ -261,19 +266,19 @@ const UpdateForm = props => {
           </div>
 
           <Form.Item label="部门名称" name="deptName" rules={[{ required: true }]}>
-            <Input maxLength={20} />
+            <Input maxLength={20} allowClear />
           </Form.Item>
           <Form.Item label="负责人" name="leader" rules={[{ required: true }]}>
-            <Input maxLength={20} />
+            <Input maxLength={20} allowClear />
           </Form.Item>
           <Form.Item label="手机号" name="phone">
-            <Input maxLength={11} />
+            <Input maxLength={11} allowClear />
           </Form.Item>
           <Form.Item label="email" name="email">
-            <Input maxLength={11} />
+            <Input maxLength={100} allowClear />
           </Form.Item>
           <Form.Item width="xs" name="orderNum" label="显示顺序" rules={[{ required: true }]}>
-            <InputNumber min={0} max={1000} />
+            <InputNumber min={0} max={1000} allowClear />
           </Form.Item>
           {visible && (
             <div className={styles.treeBox}>
@@ -283,6 +288,7 @@ const UpdateForm = props => {
                     {...areaTProps}
                     treeDataSimpleMode
                     loadData={obj => areaOnLoadData(obj)}
+                    allowClear
                   />
                 </Col>
                 <Col span={4} pull={14}>

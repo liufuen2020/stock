@@ -174,7 +174,7 @@ const UpdateForm = props => {
       >
         <Form {...formItemLayout} name="control-ref" form={form}>
           <Form.Item label="用户昵称" name="nickName" rules={[{ required: true }]}>
-            <Input maxLength={20} />
+            <Input maxLength={20} allowClear />
           </Form.Item>
           <Form.Item name="gender" label="性别">
             <Radio.Group>
@@ -184,16 +184,16 @@ const UpdateForm = props => {
             </Radio.Group>
           </Form.Item>
           <Form.Item label="用户账号" name="userName" rules={[{ required: true }]}>
-            <Input maxLength={20} />
+            <Input maxLength={20} allowClear />
           </Form.Item>
           <Form.Item label="手机号" name="phonenumber">
-            <Input maxLength={11} />
+            <Input maxLength={11} allowClear />
           </Form.Item>
           <Form.Item label="email" name="email">
-            <Input maxLength={100} />
+            <Input maxLength={100} allowClear />
           </Form.Item>
           <Form.Item label="身份证号" name="idCard">
-            <Input maxLength={18} />
+            <Input maxLength={18} allowClear />
           </Form.Item>
           <Form.Item name="roleIds" label="选择角色">
             <Select mode="multiple" placeholder="选择角色">
@@ -208,7 +208,7 @@ const UpdateForm = props => {
             </Select>
           </Form.Item>
           <Form.Item name="postIds" label="选择岗位">
-            <Select mode="multiple" placeholder="选择岗位">
+            <Select mode="multiple" placeholder="选择岗位" allowClear>
               {sysPostList &&
                 sysPostList.map(item => {
                   return (
@@ -224,7 +224,12 @@ const UpdateForm = props => {
               <Row>
                 <Col span={14} push={4}>
                   {/* <SelectTree sysDeptData={sysDeptData} /> */}
-                  <TreeSelect {...tProps} treeDataSimpleMode loadData={obj => onLoadData(obj)} />
+                  <TreeSelect
+                    {...tProps}
+                    treeDataSimpleMode
+                    loadData={obj => onLoadData(obj)}
+                    allowClear
+                  />
                 </Col>
                 <Col span={4} pull={14}>
                   <div className={styles.treeName}>选择部门：</div>
@@ -238,7 +243,7 @@ const UpdateForm = props => {
               <Radio value="2">停用</Radio>
             </Radio.Group>
           </Form.Item>
-          <Form.Item label="备注" name="remark">
+          <Form.Item label="备注" name="remark" allowClear>
             <Input.TextArea maxLength={200} />
           </Form.Item>
         </Form>

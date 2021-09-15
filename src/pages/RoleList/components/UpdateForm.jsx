@@ -153,18 +153,18 @@ const UpdateForm = props => {
       >
         <Form {...formItemLayout} name="control-ref" form={form}>
           <Form.Item label="角色名称" name="roleName" rules={[{ required: true }]}>
-            <Input maxLength={20} />
+            <Input maxLength={20} allowClear />
           </Form.Item>
           <Form.Item label="权限字符串" name="roleKey" rules={[{ required: true }]}>
-            <Input maxLength={20} />
+            <Input maxLength={20} allowClear />
           </Form.Item>
           <Form.Item width="xs" name="roleSort" label="显示顺序" rules={[{ required: true }]}>
-            <InputNumber min={0} max={1000} />
+            <InputNumber min={0} max={1000} allowClear />
           </Form.Item>
           <div className={styles.treeBox}>
             <Row>
               <Col span={14} push={4}>
-                <TreeSelect {...tProps} />
+                <TreeSelect {...tProps} allowClear />
               </Col>
               <Col span={4} pull={14}>
                 <div className={styles.treeName}>选择菜单：</div>
@@ -177,7 +177,7 @@ const UpdateForm = props => {
               <Radio value="2">停用</Radio>
             </Radio.Group>
           </Form.Item>
-          <Form.Item label="备注" name="remark">
+          <Form.Item label="备注" name="remark" allowClear>
             <Input.TextArea maxLength={200} />
           </Form.Item>
         </Form>
