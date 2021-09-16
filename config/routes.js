@@ -105,9 +105,15 @@ export default [
     routes: [
       {
         path: '/article/release',
-        name: '用户监控',
+        name: '文章发布',
         icon: 'smile',
         component: './article/release',
+      },
+      {
+        path: '/article/category',
+        name: '文章类别',
+        icon: 'smile',
+        component: './article/category',
       },
       {
         component: './404',

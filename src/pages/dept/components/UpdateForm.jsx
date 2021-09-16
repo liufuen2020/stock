@@ -84,7 +84,7 @@ const UpdateForm = props => {
 
   useEffect(() => {
     setDeptData(sysDeptData);
-    setAreaValue(setAreaTreeFormat(asynchTreeData));
+    setAreaData(setAreaTreeFormat(asynchTreeData));
     if (type === 'updata' && visible === true) {
       getDetailData();
     } else {
@@ -93,7 +93,7 @@ const UpdateForm = props => {
     }
   }, [visible]);
 
-  // 填充字段数据  部门 ---------------------------------------------------------------------------------------
+  // tree--------------------------------------------------------------------------------------
   const onLoadData = ({ id }) =>
     getSysDeptTreelist({ deptId: id }).then(res => {
       if (res.code === 0) {
