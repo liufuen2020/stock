@@ -140,7 +140,7 @@ const TableList = () => {
     <PageContainer>
       <ProTable
         actionRef={actionRef}
-        rowKey={record => record.id}
+        rowKey={record => record.menuId}
         search={{
           labelWidth: 120,
         }}

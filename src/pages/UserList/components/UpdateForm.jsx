@@ -243,8 +243,8 @@ const UpdateForm = props => {
               <Radio value={1}>停用</Radio>
             </Radio.Group>
           </Form.Item>
-          <Form.Item label="备注" name="remark" allowClear>
-            <Input.TextArea maxLength={200} />
+          <Form.Item label="备注" name="remark">
+            <Input.TextArea maxLength={200} allowClear />
           </Form.Item>
         </Form>
       </Drawer>

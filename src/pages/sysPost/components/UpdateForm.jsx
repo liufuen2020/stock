@@ -135,7 +135,7 @@ const UpdateForm = props => {
             </Radio.Group>
           </Form.Item>
           <Form.Item label="备注" name="remark">
-            <Input.TextArea maxLength={200} />
+            <Input.TextArea maxLength={200} allowClear />
           </Form.Item>
         </Form>
       </Drawer>

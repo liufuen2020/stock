@@ -243,7 +243,7 @@ const UpdateForm = props => {
           </Form.Item>
 
           <Form.Item width="xs" name="orderNum" label="显示顺序" rules={[{ required: true }]}>
-            <InputNumber min={0} max={1000} allowClear />
+            <InputNumber min={0} max={1000} />
           </Form.Item>
 
           <Form.Item label="权限字符" name="perms">

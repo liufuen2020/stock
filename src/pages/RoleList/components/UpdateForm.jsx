@@ -159,7 +159,7 @@ const UpdateForm = props => {
             <Input maxLength={20} allowClear />
           </Form.Item>
           <Form.Item width="xs" name="roleSort" label="显示顺序" rules={[{ required: true }]}>
-            <InputNumber min={0} max={1000} allowClear />
+            <InputNumber min={0} max={1000} />
           </Form.Item>
           <div className={styles.treeBox}>
             <Row>
@@ -177,8 +177,8 @@ const UpdateForm = props => {
               <Radio value={1}>停用</Radio>
             </Radio.Group>
           </Form.Item>
-          <Form.Item label="备注" name="remark" allowClear>
-            <Input.TextArea maxLength={200} />
+          <Form.Item label="备注" name="remark">
+            <Input.TextArea maxLength={200} allowClear />
           </Form.Item>
         </Form>
       </Drawer>

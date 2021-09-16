@@ -100,6 +100,21 @@ export default [
     ],
   },
   {
+    path: '/article',
+    name: '文章管理',
+    routes: [
+      {
+        path: '/article/release',
+        name: '用户监控',
+        icon: 'smile',
+        component: './article/release',
+      },
+      {
+        component: './404',
+      },
+    ],
+  },
+  {
     path: '/',
     redirect: '/admin/role',
   },
