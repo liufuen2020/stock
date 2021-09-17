@@ -1,4 +1,4 @@
-import { Button, message, Table, Divider } from 'antd';
+import { Button, message, Table, Divider, Popconfirm } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import { meunTree } from '@/services/ant-design-pro/api';
@@ -157,9 +157,15 @@ const TableList = () => {
               编辑
             </Button>
             <Divider type="vertical" />
-            <Button type="link" onClick={() => handleRemove(record.menuId)}>
-              删除
-            </Button>
+            <Popconfirm
+              placement="topRight"
+              title="确实要删除此条信息吗？"
+              onConfirm={() => handleRemove(record.menuId)}
+              okText="确定"
+              cancelText="取消"
+            >
+              <Button type="link">删除</Button>
+            </Popconfirm>
           </>
         );
         return <>{text}</>;

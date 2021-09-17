@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, message, Divider } from 'antd';
+import { Button, message, Divider, Popconfirm } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { FormattedMessage } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
@@ -118,9 +118,15 @@ const TableList = () => {
               编辑
             </Button>
             <Divider type="vertical" />
-            <Button type="link" onClick={() => handleRemove(record.postId)}>
-              删除
-            </Button>
+            <Popconfirm
+              placement="topRight"
+              title="确实要删除此条信息吗？"
+              onConfirm={() => handleRemove(record.postId)}
+              okText="确定"
+              cancelText="取消"
+            >
+              <Button type="link">删除</Button>
+            </Popconfirm>
           </>
         );
         return <>{text}</>;
