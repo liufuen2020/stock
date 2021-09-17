@@ -122,6 +122,12 @@ export default [
         component: './article/column',
       },
       {
+        path: '/article/site',
+        name: '文章类别',
+        icon: 'smile',
+        component: './article/site',
+      },
+      {
         component: './404',
       },
     ],
