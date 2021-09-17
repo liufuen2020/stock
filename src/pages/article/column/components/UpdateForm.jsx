@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  message,
-  Drawer,
-  Form,
-  Input,
-  Button,
-  Radio,
-  InputNumber,
-  Row,
-  Col,
-  TreeSelect,
-} from 'antd';
+import { message, Drawer, Form, Input, Button, Row, Col, TreeSelect } from 'antd';
 import { addField, upadataField, cmsCategoryTree } from '../api';
 import styles from '../index.less';
 
@@ -18,11 +7,11 @@ const setAreaTreeFormat = datas => {
   const newData = [];
   datas.map(item => {
     const obj = {
-      id: item.categoryId,
-      value: item.categoryId,
+      id: item.columnId,
+      value: item.columnId,
       pId: item.parentId,
-      title: item.categoryName,
-      isLeaf: !item.parentNode,
+      title: item.columnName,
+      isLeaf: item.parentNode,
     };
     newData.push(obj);
     return '';
@@ -70,7 +59,7 @@ const UpdateForm = props => {
   const updataData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    upadataField({ ...values, categoryId: data.categoryId, parentId: treeValue }).then(res => {
+    upadataField({ ...values, columnId: data.columnId, parentId: treeValue }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -184,28 +173,13 @@ const UpdateForm = props => {
                   />
                 </Col>
                 <Col span={4} pull={14}>
-                  <div className={styles.treeName}>父级类别：</div>
+                  <div className={styles.treeName}>父级栏目：</div>
                 </Col>
               </Row>
             </div>
           )}
-          <Form.Item label="类别名称" name="categoryName" rules={[{ required: true }]}>
+          <Form.Item label="栏目名称" name="columnName" rules={[{ required: true }]}>
             <Input maxLength={20} allowClear />
-          </Form.Item>
-          <Form.Item label="描述" name="description">
-            <Input.TextArea maxLength={200} allowClear />
-          </Form.Item>
-          <Form.Item label="icon" name="icon">
-            <Input maxLength={20} allowClear />
-          </Form.Item>
-          <Form.Item width="xs" name="orderNum" label="显示顺序" rules={[{ required: true }]}>
-            <InputNumber min={0} max={1000} />
-          </Form.Item>
-          <Form.Item name="status" label="状态">
-            <Radio.Group>
-              <Radio value={0}>正常</Radio>
-              <Radio value={1}>停用</Radio>
-            </Radio.Group>
           </Form.Item>
         </Form>
       </Drawer>

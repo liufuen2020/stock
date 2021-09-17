@@ -116,6 +116,12 @@ export default [
         component: './article/category',
       },
       {
+        path: '/article/column',
+        name: '文章类别',
+        icon: 'smile',
+        component: './article/column',
+      },
+      {
         component: './404',
       },
     ],
