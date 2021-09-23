@@ -17,12 +17,12 @@ const setList = arr => {
   const newTreeData = [];
   arr.map(item => {
     const obj = {
-      path: item.path,
+      path: `${item.path}`,
       name: item.menuName,
       component: item.component,
     };
 
-    if (item.icon) {
+    if (item.icon && item.menuType === 'M') {
       obj.icon = item.icon;
     }
     if (item.children && item.children.length) {
@@ -201,7 +201,8 @@ request.interceptors.response.use(async res => {
     Local.clear();
     message.error('token过期，请重新登录');
     setTimeout(() => {
-      history.push(loginPath);
+      // history.push(loginPath);
+      window.location.href = loginPath;
     }, 1500);
     return false;
   }

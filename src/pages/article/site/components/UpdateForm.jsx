@@ -22,7 +22,7 @@ const setAreaTreeFormat = datas => {
       value: item.siteId,
       pId: item.parentId,
       title: item.siteName,
-      isLeaf: item.parentNode,
+      isLeaf: !item.parentNode,
     };
     newData.push(obj);
     return '';
@@ -123,7 +123,7 @@ const UpdateForm = props => {
   // ------------------------------tree -----------------------
 
   const areaOnLoadData = ({ id }) =>
-    cmsCategoryTree({ categoryId: id }).then(res => {
+    cmsCategoryTree({ siteId: id }).then(res => {
       if (res.code === 0) {
         setTreeData(treeData.concat(setAreaTreeFormat(res.data)));
       }

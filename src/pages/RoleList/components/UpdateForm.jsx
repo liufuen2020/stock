@@ -26,7 +26,17 @@ const UpdateForm = props => {
   const getDetail = () => {
     getRuleDetail(data.roleId).then(res => {
       if (res.code === 0) {
-        setTValue(res.data.menuIds || []);
+        const menuIds = res.data.menuIds || [];
+        menuIds.map((item, index) => {
+          menuData.map(items => {
+            if (item === items.key && items.children && items.children.length > 0) {
+              menuIds.splice(index, 1);
+            }
+            return '';
+          });
+          return '';
+        });
+        setTValue(menuIds || []);
         form.setFieldsValue(res.data);
       } else {
         message.error(res.msg || '获取详情失败');
@@ -69,6 +79,28 @@ const UpdateForm = props => {
     },
   };
 
+  // 提交时候 数据菜单处理
+  const setTreeData = tvalues => {
+    const newTreeD = [];
+    menuData.map(item => {
+      if (tvalues.indexOf(item.value) > -1 && item.children && item.children.length) {
+        item.children.map(items => {
+          newTreeD.push(items.key);
+          return '';
+        });
+      } else if (item.children && item.children.length) {
+        item.children.map(items => {
+          if (tvalues.indexOf(items.key) > -1) {
+            newTreeD.push(item.key);
+          }
+          return '';
+        });
+      }
+      return '';
+    });
+    return newTreeD;
+  };
+
   /**
    * @en-US Update node
    * @zh-CN values
@@ -78,7 +110,13 @@ const UpdateForm = props => {
   const updataData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    upadataRule({ ...values, roleId: data.roleId, menuIds: tvalue }).then(res => {
+
+    upadataRule({
+      ...values,
+      roleId: data.roleId,
+      // eslint-disable-next-line compat/compat
+      menuIds: Array.from(new Set(setTreeData(tvalue).concat(tvalue))),
+    }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -98,16 +136,20 @@ const UpdateForm = props => {
   const addData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    addRule({ ...values, menuIds: tvalue }).then(res => {
-      hide();
-      setLoading(false);
-      if (res.code === 0) {
-        onCancel(false);
-        onSuccess();
-      } else {
-        message.error(res.msg || '添加失败，请重试');
-      }
-    });
+
+    // eslint-disable-next-line compat/compat
+    addRule({ ...values, menuIds: Array.from(new Set(setTreeData(tvalue).concat(tvalue))) }).then(
+      res => {
+        hide();
+        setLoading(false);
+        if (res.code === 0) {
+          onCancel(false);
+          onSuccess();
+        } else {
+          message.error(res.msg || '添加失败，请重试');
+        }
+      },
+    );
   };
 
   /**
@@ -117,6 +159,9 @@ const UpdateForm = props => {
    * @param values
    */
   const sendData = () => {
+    // setNewTvalue(setTreeData(tvalue).concat(tvalue));
+    // console.log(123, setTreeData(tvalue).concat(tvalue));
+    // return;
     form.validateFields().then(values => {
       if (type === 'updata') updataData(values);
       if (type === 'add') addData(values);

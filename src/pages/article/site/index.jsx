@@ -17,9 +17,10 @@ import UpdateForm from './components/UpdateForm';
 const getListData = async fields => {
   try {
     const data = await getList({ ...fields });
-    if (data.code === 0) {
+    if (data && data.code === 0 && data.data.list) {
       return { data: data.data.list, total: data.data.total };
     }
+    message.error(data.msg || '请求失败，请重试');
   } catch (error) {
     message.error('请求失败，请重试');
     return false;

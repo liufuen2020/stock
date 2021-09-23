@@ -5,7 +5,7 @@ import { FormattedMessage } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 // import moment from 'moment';
-import { getList, removeField, cmsCategoryTree } from './api';
+import { getList, removeField, cmsColumnTree } from './api';
 import UpdateForm from './components/UpdateForm';
 
 /**
@@ -17,9 +17,10 @@ import UpdateForm from './components/UpdateForm';
 const getListData = async fields => {
   try {
     const data = await getList({ ...fields });
-    if (data.code === 0) {
+    if (data && data.code === 0 && data.data.list) {
       return { data: data.data.list, total: data.data.total };
     }
+    message.error(data.msg || '请求失败，请重试');
   } catch (error) {
     message.error('请求失败，请重试');
     return false;
@@ -58,7 +59,7 @@ const TableList = () => {
   // 获取 类别树结构
   const getListTree = async fields => {
     try {
-      const data = await cmsCategoryTree({ ...fields });
+      const data = await cmsColumnTree({ ...fields });
       if (data.code === 0) {
         setTreeData(data.data);
         return;

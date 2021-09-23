@@ -25,11 +25,12 @@ const TableList = () => {
   const getListData = async fields => {
     try {
       const data = await getList({ ...fields });
-      if (data.code === 0) {
+      if (data && data.code === 0 && data.data.list) {
         setLogDictData(formatDict(dictData, 'business_type'));
         return { data: data.data.list, total: data.data.total };
       }
-      message.error('请求失败，请重试');
+      message.error(data.msg || '请求失败，请重试');
+      return;
     } catch (error) {
       message.error('请求失败，请重试');
       return false;
@@ -102,9 +103,10 @@ const TableList = () => {
       render: (_, record) => {
         return (
           <>
-            {logDictData.map(item => {
+            {logDictData.map((item, index) => {
               if (item.dictValue * 1 === record.businessType) {
-                return <span>{item.dictLabel}</span>;
+                // eslint-disable-next-line react/no-array-index-key
+                return <span key={index}>{item.dictLabel}</span>;
               }
               return '';
             })}
@@ -140,7 +142,7 @@ const TableList = () => {
     <PageContainer>
       <ProTable
         actionRef={actionRef}
-        rowKey={record => record.menuId}
+        rowKey={record => record.id}
         search={{
           labelWidth: 120,
         }}

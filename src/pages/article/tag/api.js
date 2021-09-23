@@ -6,16 +6,16 @@ import { request } from 'umi';
 
 // 用户列表
 export async function getList(params, options) {
-  return request('/api/cmsColumn/page', {
+  return request('/api/cmsTags/page', {
     method: 'GET',
     params: { ...params },
     ...(options || {}),
   });
 }
 
-// 详情
-export async function cmsColumnTree(params, options) {
-  return request(`/api/cmsColumn/tree`, {
+// 树形类表
+export async function cmsCategoryTree(params, options) {
+  return request(`/api/cmsSite/tree`, {
     method: 'GET',
     params: { ...params },
     ...(options || {}),
@@ -24,7 +24,7 @@ export async function cmsColumnTree(params, options) {
 
 // 增加
 export async function addField(body, options) {
-  return request('/api/cmsColumn/column', {
+  return request('/api/cmsTags/tag', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export async function addField(body, options) {
 }
 
 export async function upadataField(body, options) {
-  return request('/api/cmsColumn/column', {
+  return request('/api/cmsTags/tag', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export async function upadataField(body, options) {
 /** 删除  */
 
 export async function removeField(options) {
-  return request(`/api/cmsColumn/column/${options}`, {
+  return request(`/api/cmsTags/tag/${options}`, {
     method: 'DELETE',
   });
 }

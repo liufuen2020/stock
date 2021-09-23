@@ -15,7 +15,11 @@ import UpdateForm from './components/UpdateForm';
 const getSysUserList = async fields => {
   try {
     const data = await sysUserList({ ...fields });
-    return { data: data.data.list };
+    if (data && data.code === 0 && data.data.list) {
+      return { data: data.data.list, total: data.data.total };
+    }
+    message.error(data.msg || '请求失败，请重试');
+    return;
   } catch (error) {
     message.error('请求失败，请重试');
     return false;

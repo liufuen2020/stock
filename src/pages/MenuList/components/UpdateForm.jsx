@@ -271,17 +271,18 @@ const UpdateForm = props => {
               <Form.Item label="路由地址" name="path" rules={[{ required: true }]}>
                 <Input maxLength={20} allowClear />
               </Form.Item>
-              <Form.Item name="status" label="菜单状态">
-                <Radio.Group>
-                  <Radio value={0}>正常</Radio>
-                  <Radio value={1}>停用</Radio>
-                </Radio.Group>
-              </Form.Item>
+
               <Form.Item label="备注" name="remark">
                 <Input.TextArea maxLength={200} allowClear />
               </Form.Item>
             </div>
           )}
+          <Form.Item name="status" label="菜单状态">
+            <Radio.Group>
+              <Radio value={0}>正常</Radio>
+              <Radio value={1}>停用</Radio>
+            </Radio.Group>
+          </Form.Item>
         </Form>
       </Drawer>
       <Modal title="选择图标" visible={isModalVisible} onOk={handleCancel} onCancel={handleCancel}>

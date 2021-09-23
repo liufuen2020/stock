@@ -25,7 +25,7 @@ export default [
     component: './Welcome',
   },
   {
-    path: '/admin',
+    path: '/system',
     name: '授权管理',
     icon: 'crown',
     hidden: true,
@@ -33,44 +33,44 @@ export default [
     // component: './TableList',
     routes: [
       {
-        path: '/admin/role',
+        path: '/system/role',
         name: '角色管理',
         icon: 'smile',
         component: './RoleList',
       },
       {
-        path: '/admin/account',
+        path: '/system/user',
         name: '账号管理',
         icon: 'smile',
         component: './UserList',
       },
       {
-        path: '/admin/menu',
+        path: '/system/menu',
         name: '菜单管理',
         icon: 'smile',
         hidden: true,
         component: './MenuList',
       },
       {
-        path: '/admin/sysPost',
+        path: '/system/post',
         name: '岗位管理',
         icon: 'smile',
         component: './sysPost',
       },
       {
-        path: '/admin/dept',
+        path: '/system/dept',
         name: '部门管理',
         icon: 'smile',
         component: './dept',
       },
       {
-        path: '/admin/dict',
+        path: '/system/dict',
         name: '字典管理',
         icon: 'smile',
         component: './DictData',
       },
       {
-        path: '/admin/log',
+        path: '/system/log',
         name: '日志管理',
         icon: 'smile',
         component: './log',
@@ -85,11 +85,11 @@ export default [
     component: './settings',
   },
   {
-    path: '/system',
+    path: '/monitor',
     name: '监控管理',
     routes: [
       {
-        path: '/system/online',
+        path: '/monitor/online',
         name: '用户监控',
         icon: 'smile',
         component: './system/online',
@@ -111,21 +111,27 @@ export default [
       },
       {
         path: '/article/category',
-        name: '文章类别',
+        name: '类别管理',
         icon: 'smile',
         component: './article/category',
       },
       {
         path: '/article/column',
-        name: '文章类别',
+        name: '栏目管理',
         icon: 'smile',
         component: './article/column',
       },
       {
         path: '/article/site',
-        name: '文章类别',
+        name: '站点管理',
         icon: 'smile',
         component: './article/site',
+      },
+      {
+        path: '/article/tag',
+        name: '标签管理',
+        icon: 'smile',
+        component: './article/tag',
       },
       {
         component: './404',

@@ -1,11 +1,10 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, message, Divider, Popconfirm } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
-import { FormattedMessage } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 // import moment from 'moment';
-import { getList, removeField, cmsCategoryTree } from './api';
+import { getList, removeField } from './api';
 import UpdateForm from './components/UpdateForm';
 
 /**
@@ -21,6 +20,7 @@ const getListData = async fields => {
       return { data: data.data.list, total: data.data.total };
     }
     message.error(data.msg || '请求失败，请重试');
+    return;
   } catch (error) {
     message.error('请求失败，请重试');
     return false;
@@ -29,8 +29,6 @@ const getListData = async fields => {
 
 const TableList = () => {
   const actionRef = useRef();
-
-  const [treeData, setTreeData] = useState([]);
 
   /**
    *  Delete node
@@ -56,23 +54,7 @@ const TableList = () => {
     }
   };
 
-  // 获取 类别树结构
-  const getListTree = async fields => {
-    try {
-      const data = await cmsCategoryTree({ ...fields });
-      if (data.code === 0) {
-        setTreeData(data.data);
-        return;
-      }
-    } catch (error) {
-      message.error('请求失败，请重试');
-      return false;
-    }
-  };
-
-  useEffect(() => {
-    getListTree();
-  }, []);
+  useEffect(() => {}, []);
 
   // 更新数据 组件 ------------------------------------------------------------------
 
@@ -116,21 +98,20 @@ const TableList = () => {
       valueType: 'option',
       dataIndex: '',
       render(text, record, index) {
+        // eslint-disable-next-line react/jsx-filename-extension
         return <span key={index}>{index + 1}</span>;
       },
     },
     {
-      title: '类别名称',
-      dataIndex: 'categoryName',
+      title: '标签名称',
+      dataIndex: 'tagName',
     },
+
     {
       title: '描述',
       dataIndex: 'description',
     },
-    {
-      title: '父级ID',
-      dataIndex: 'parentId',
-    },
+
     // {
     //   title: '创建时间',
     //   dataIndex: 'createTime',
@@ -152,7 +133,7 @@ const TableList = () => {
             <Popconfirm
               placement="topRight"
               title="确实要删除此条信息吗？"
-              onConfirm={() => handleRemove(record.categoryId)}
+              onConfirm={() => handleRemove(record.tagId)}
               okText="确定"
               cancelText="取消"
             >
@@ -168,13 +149,13 @@ const TableList = () => {
     <PageContainer>
       <ProTable
         actionRef={actionRef}
-        rowKey={record => record.categoryId}
+        rowKey={record => record.tagId}
         search={{
           labelWidth: 120,
         }}
         toolBarRender={() => [
           <Button type="primary" key="primary" onClick={addUser}>
-            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
+            <PlusOutlined /> 新建
           </Button>,
         ]}
         request={getListData}
@@ -186,7 +167,6 @@ const TableList = () => {
         data={updataData}
         onSuccess={updataSuccess}
         type={type}
-        indexTreeData={treeData}
       />
     </PageContainer>
   );
