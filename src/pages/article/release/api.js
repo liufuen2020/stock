@@ -6,20 +6,67 @@ import { request } from 'umi';
 
 // 用户列表
 export async function getList(params, options) {
-  return request('/api/userMonitor/list', {
+  return request('/api/cmsArticle/list', {
     method: 'GET',
     params: { ...params },
     ...(options || {}),
   });
 }
 
-export async function forceLogout(body, options) {
-  return request(`/api/userMonitor/forceLogout/${body}`, {
+// 详情
+export async function getDetail(options) {
+  return request(`/api/cmsArticle/article/${options}`, {
+    method: 'GET',
+  });
+}
+// 增加
+export async function addField(body, options) {
+  return request('/api/cmsArticle/article', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    data: null,
+    data: body,
+    ...(options || {}),
+  });
+}
+
+export async function upadataField(body, options) {
+  return request('/api/cmsArticle/article', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+export async function audit(body, options) {
+  return request('/api/cmsArticle/audit', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 删除  */
+
+export async function removeField(options) {
+  return request(`/api/cmsArticle/article/${options}`, {
+    method: 'DELETE',
+  });
+}
+
+/** tagList */
+
+export async function tagList(params, options) {
+  return request('/api/cmsTags/list', {
+    method: 'GET',
+    params: { ...params },
     ...(options || {}),
   });
 }

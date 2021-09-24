@@ -140,7 +140,7 @@ export default [
   },
   {
     path: '/',
-    redirect: '/admin/role',
+    redirect: '/welcome',
   },
   {
     component: './404',

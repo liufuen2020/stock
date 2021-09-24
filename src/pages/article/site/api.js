@@ -14,7 +14,7 @@ export async function getList(params, options) {
 }
 
 // 树形类表
-export async function cmsCategoryTree(params, options) {
+export async function cmsSiteTree(params, options) {
   return request(`/api/cmsSite/tree`, {
     method: 'GET',
     params: { ...params },

@@ -11,7 +11,7 @@ import {
   Col,
   TreeSelect,
 } from 'antd';
-import { addField, upadataField, cmsCategoryTree } from '../api';
+import { addField, upadataField, cmsSiteTree } from '../api';
 import styles from '../index.less';
 
 const setAreaTreeFormat = datas => {
@@ -123,7 +123,7 @@ const UpdateForm = props => {
   // ------------------------------tree -----------------------
 
   const areaOnLoadData = ({ id }) =>
-    cmsCategoryTree({ siteId: id }).then(res => {
+    cmsSiteTree({ siteId: id }).then(res => {
       if (res.code === 0) {
         setTreeData(treeData.concat(setAreaTreeFormat(res.data)));
       }

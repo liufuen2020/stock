@@ -14,7 +14,7 @@ export async function getList(params, options) {
 
 // 详情
 export async function getDetail(options) {
-  return request(`/api//sysDept/dept/${options}`, {
+  return request(`/api/sysDept/dept/${options}`, {
     method: 'GET',
   });
 }

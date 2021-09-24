@@ -5,7 +5,7 @@ import { FormattedMessage } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 // import moment from 'moment';
-import { getList, removeField, cmsCategoryTree } from './api';
+import { getList, removeField, cmsSiteTree } from './api';
 import UpdateForm from './components/UpdateForm';
 
 /**
@@ -59,7 +59,7 @@ const TableList = () => {
   // 获取 类别树结构
   const getListTree = async fields => {
     try {
-      const data = await cmsCategoryTree({ ...fields });
+      const data = await cmsSiteTree({ ...fields });
       if (data.code === 0) {
         setTreeData(data.data);
         return;

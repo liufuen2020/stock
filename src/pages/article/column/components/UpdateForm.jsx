@@ -33,14 +33,18 @@ const UpdateForm = props => {
   // 详情
   const getDetailData = () => {
     form.setFieldsValue({ ...data });
+    setTreeValue(data.parentId);
   };
 
   useEffect(() => {
+    form.setFieldsValue({ audit: 0 });
     setTreeData(setAreaTreeFormat(indexTreeData));
     if (type === 'updata' && visible === true) {
       getDetailData();
     } else {
+      setTreeValue('');
       form.resetFields();
+      form.setFieldsValue({ audit: 0 });
     }
   }, [visible]);
 
