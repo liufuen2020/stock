@@ -114,7 +114,7 @@ const UpdateForm = props => {
       >
         <Form {...formItemLayout} name="control-ref" form={form}>
           <Form.Item label="敏感词名称" name="word" rules={[{ required: true }]}>
-            <Input maxLength={30} allowClear />
+            <Input maxLength={10} allowClear />
           </Form.Item>
         </Form>
       </Drawer>
