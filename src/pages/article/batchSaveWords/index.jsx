@@ -1,7 +1,6 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, message, Divider, Popconfirm } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
-import { FormattedMessage } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 import moment from 'moment';
@@ -99,20 +98,36 @@ const TableList = () => {
 
   const columns = [
     {
-      title: '岗位名称',
-      dataIndex: 'postName',
-    },
-    {
-      title: '岗位状态',
-      dataIndex: 'status',
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      render: (_, record) => {
-        return <>{moment(record.createTime).format('YYYY-MM-DD')}</>;
+      title: '序号',
+      valueType: 'option',
+      dataIndex: '',
+      render(text, record, index) {
+        // eslint-disable-next-line react/jsx-filename-extension
+        return <span key={index}>{index + 1}</span>;
       },
     },
+    {
+      title: '敏感词',
+      dataIndex: 'word',
+    },
+    {
+      title: '开始生效时间		',
+      dataIndex: 'startTime',
+      valueType: 'option',
+      render: (_, record) => {
+        return <>{moment(record.startTime).format('YYYY-MM-DD HH:mm:ss')}</>;
+      },
+    },
+
+    {
+      title: '结束生效时间	',
+      dataIndex: 'endTime',
+      valueType: 'option',
+      render: (_, record) => {
+        return <>{moment(record.endTime).format('YYYY-MM-DD HH:mm:ss')}</>;
+      },
+    },
+
     {
       title: '操作',
       dataIndex: 'opt',
@@ -127,7 +142,7 @@ const TableList = () => {
             <Popconfirm
               placement="topRight"
               title="确实要删除此条信息吗？"
-              onConfirm={() => handleRemove(record.postId)}
+              onConfirm={() => handleRemove(record.wordId)}
               okText="确定"
               cancelText="取消"
             >
@@ -143,13 +158,13 @@ const TableList = () => {
     <PageContainer>
       <ProTable
         actionRef={actionRef}
-        rowKey={record => record.postId}
+        rowKey={record => record.wordId}
         search={{
           labelWidth: 120,
         }}
         toolBarRender={() => [
           <Button type="primary" key="primary" onClick={addUser}>
-            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
+            <PlusOutlined /> 新建
           </Button>,
         ]}
         request={getListData}

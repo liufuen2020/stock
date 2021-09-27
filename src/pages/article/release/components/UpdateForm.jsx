@@ -13,19 +13,20 @@ import {
   TreeSelect,
   Upload,
   Spin,
+  DatePicker,
 } from 'antd';
 import BraftEditor from 'braft-editor';
+import moment from 'moment';
 import 'braft-editor/dist/index.css';
 import local from '@/utils/local';
 
-import { addField, upadataField, getDetail } from '../api';
+import { addField, upadataField, getDetail, columnTree } from '../api';
 import { cmsCategoryTree } from '../../category/api';
-// import { cmsColumnTree } from '../../column/api';
+import { cmsSiteTree } from '../../site/api';
 
 import styles from '../index.less';
 
 const { Option } = Select;
-
 /**
  * @zh-CN 文章类型
  *
@@ -48,29 +49,54 @@ const setAreaTreeFormat = datas => {
 };
 
 /**
+ * @zh-CN 站点树结构
+ *
+ * @param datas
+ */
+const setSiteTreeFormat = datas => {
+  const newData = [];
+  datas.map(item => {
+    const obj = {
+      id: item.siteId,
+      value: item.siteId,
+      pId: item.parentId,
+      title: item.siteName,
+      isLeaf: !item.parentNode,
+    };
+    newData.push(obj);
+    return '';
+  });
+  return newData;
+};
+
+/**
  * @zh-CN 栏目
  *
  * @param datas
  */
-// const setColumnTreeFormat = datas => {
-//   const newData = [];
-//   datas.map(item => {
-//     const obj = {
-//       id: item.columnId,
-//       value: item.columnId,
-//       pId: item.parentId,
-//       title: item.columnName,
-//       isLeaf: item.parentNode,
-//     };
-//     newData.push(obj);
-//     return '';
-//   });
-//   return newData;
-// };
+
+const setColumnTreeFormat = arr => {
+  if (!arr || (arr && arr.length === 0)) return [];
+  const newTreeData = [];
+  arr.map(res => {
+    const obj = {
+      title: res.columnName,
+      value: res.columnId,
+      key: res.columnId,
+    };
+
+    if (res.children && res.children.length) {
+      obj.children = setColumnTreeFormat(res.children);
+    }
+    newTreeData.push(obj);
+    return '';
+  });
+  return newTreeData;
+};
 
 const UpdateForm = props => {
   // 结构化数据
-  const { visible, onCancel, onSuccess, data, type, indexTreeData, tagList } = props;
+  const { visible, onCancel, onSuccess, data, type, indexTreeData, tagList, siteTreeData } = props;
 
   // 初始化 form
   const [form] = Form.useForm();
@@ -83,24 +109,22 @@ const UpdateForm = props => {
   const [sliderImg, setSliderImg] = useState(); // 轮播地址
   const [BraftEditorValue, setBraftEditorValue] = useState(); // 编辑器
 
-  const [site, setSite] = useState([
-    {
-      columnId: 0,
-      siteId: 0,
-      treeData: [],
-    },
-    {
-      columnId: 1,
-      siteId: 1,
-      treeData: [],
-    },
-  ]);
+  const [siteTreeDatas, setSiteTreeDatas] = useState([]); //  站点树处理
+  const [site, setSite] = useState({ siteId: '', label: '', columnId: [] }); //  站点树处理
 
-  // const [columnTreeData, setColumnTreeData] = useState(); // 栏目
-  // const [columnTreeValue, setColumnTreeValue] = useState();
+  const [columnTreeDatas, setColumnTreeDatas] = useState([]); //  栏目树处理
+  const [columnId, setColumnId] = useState([]); //  栏目树处理
+
+  const [hasSite, setHasSite] = useState([]);
+
+  // const [site, setSite] = useState([
+  //   {
+  //     siteId: 0,
+  //     columnId: [{ id: 0, label: '体育' }],
+  //   },
+  // ]);
 
   /**
-
    * @zh-CN 编辑器事件
    *
    * @param fields
@@ -109,14 +133,14 @@ const UpdateForm = props => {
     setBraftEditorValue(value.toHTML());
   };
 
-  // const getColumnTreeData = id => {
-  //   cmsColumnTree({ columnId: id }).then(res => {
-  //     if (res.code === 0) {
-  //       setColumnTreeData(setColumnTreeFormat(res.data));
-  //     }
-  //   });
-  // };
-
+  const setTag = tags => {
+    const newTags = [];
+    tags.map(item => {
+      newTags.push(item.tagId);
+      return '';
+    });
+    return newTags;
+  };
   // 详情
   const getDetailData = () => {
     setLoading(true);
@@ -126,10 +150,12 @@ const UpdateForm = props => {
         form.setFieldsValue({
           ...data,
           ...res.data,
+          publishTime: moment(data.publishTime),
+          tagIds: setTag(res.data.tags),
           content: BraftEditor.createEditorState(res.data.content),
         });
         setSlider(data.slider);
-
+        setSiteTreeDatas(setSiteTreeFormat(siteTreeData));
         setBraftEditorValue(data.content);
       } else {
         message.error(res.msg || '详情请求失败，请重试');
@@ -153,6 +179,18 @@ const UpdateForm = props => {
     wrapperCol: { span: 19 },
   };
 
+  const setListData = () => {
+    const newList = [];
+    site.map(item => {
+      const obj = {
+        columnId: item.columnId,
+        siteId: item.siteId,
+      };
+      newList.push(obj);
+      return '';
+    });
+    return newList;
+  };
   /**
 
    * @zh-CN 更新文章
@@ -162,17 +200,16 @@ const UpdateForm = props => {
   const updataData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    upadataField({
-      ...values,
-      list: [
-        {
-          columnId: 0,
-          siteId: 0,
-        },
-      ],
-      articleId: data.articleId,
+    const payload = {
       categoryId: treeValue,
       content: BraftEditorValue,
+      sliderImg,
+      // list: setListData(),
+    };
+    upadataField({
+      ...values,
+      ...payload,
+      articleId: data.articleId,
     }).then(res => {
       hide();
       setLoading(false);
@@ -193,8 +230,13 @@ const UpdateForm = props => {
   const addData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-
-    addField({ ...values, categoryId: treeValue, content: BraftEditorValue }).then(res => {
+    const payload = {
+      categoryId: treeValue,
+      content: BraftEditorValue,
+      sliderImg,
+      list: setListData(),
+    };
+    addField({ ...values, ...payload }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -242,15 +284,68 @@ const UpdateForm = props => {
       areaTreeDataChange(value);
     },
   };
-  // ----------------------------------------------------------------- end -----------------------
+  // ----------------------------------------------------------------- end ------ site start -----------------
 
-  const siteOnChange = (value, index) => {
-    const newSite = JSON.parse(JSON.stringify(site));
-    newSite[index].siteId = value;
-    setSite(newSite);
+  const siteOnChange = (value, label) => {
+    setLoading(true);
+    setSite({ siteId: value, label: label[0], columnId: [] });
+    setColumnTreeDatas([]);
+    setColumnId([]);
+    columnTree(value).then(res => {
+      setLoading(false);
+      if (res.code === 0) {
+        const newArr = (res.data && [res.data]) || [];
+        setColumnTreeDatas(setColumnTreeFormat(newArr));
+      } else {
+        message.error(res.msg || '栏目请求失败，请重试');
+      }
+    });
   };
 
-  //---------------------
+  const siteOnLoadData = ({ id }) => {
+    return cmsSiteTree({ siteId: id }).then(res => {
+      if (res.code === 0 && res.data && res.data.length) {
+        const newSite = siteTreeDatas.concat(setSiteTreeFormat(res.data));
+        setSiteTreeDatas(newSite);
+      }
+    });
+  };
+
+  const columnOnChange = (value, label) => {
+    setColumnId(value);
+
+    const columnIds = [];
+    value.map((item, index) => {
+      const obj = {};
+      obj.columnId = item;
+      obj.label = label[index];
+      columnIds.push(obj);
+      return '';
+    });
+    setSite({ ...site, columnId: columnIds });
+  };
+
+  /**
+   * @zh-CN 添加栏目
+   *
+   * @param values
+   */
+  const addSite = () => {
+    if (!site.siteId || site.columnId.length === 0) {
+      message.error('请选择栏目后，添加');
+      return;
+    }
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < hasSite.length; i++) {
+      if (hasSite[i].siteId === site.siteId) {
+        message.error('该站点已存在，请编辑或删除后操作');
+        return;
+      }
+    }
+    setHasSite(hasSite.concat([site]));
+  };
+
+  //------------------------------------------------------------------------------------------------------------------
 
   const accessToken = local.get('token');
   // 轮播图
@@ -259,17 +354,20 @@ const UpdateForm = props => {
       Authorization: `Bearer ${accessToken}`,
     },
     showUploadList: false,
+    data: { businessType: 'cms', fileName: 'fileName' },
     // eslint-disable-next-line no-undef
-    action: `${API_PREFIX}/sysPerson/avatar`,
+    action: `${API_PREFIX}/upload`,
     onChange: info => {
       setLoading(true);
       if (info.file && info.file.response && info.file.response.code === 0) {
         setLoading(false);
-        setSliderImg(info.file.response.data);
+        setSliderImg(info.file.response.data.fileUrl);
       }
     },
     multiple: true,
   };
+  // eslint-disable-next-line no-undef
+  const sliderImgBg = `${baseUrl}${sliderImg}`;
 
   // 监听字段变化
   const formChange = value => {
@@ -310,7 +408,7 @@ const UpdateForm = props => {
             <Form.Item label="文章关键词" name="keywords" rules={[{ required: true }]}>
               <Input maxLength={120} allowClear style={{ width: 500 }} />
             </Form.Item>
-            <Form.Item name="tagIds" label="选择标签">
+            <Form.Item name="tagIds" label="选择标签" rules={[{ required: true }]}>
               <Select mode="multiple" placeholder="选择标签" style={{ width: 500 }}>
                 {tagList &&
                   tagList.map(item => {
@@ -330,35 +428,47 @@ const UpdateForm = props => {
                 <div className={styles.treeBox}>
                   <Row>
                     <Col span={14} push={4}>
-                      {site.map((item, index) => {
-                        return (
-                          // eslint-disable-next-line react/no-array-index-key
-                          <div key={index}>
-                            <TreeSelect
-                              treeData={
-                                treeData && treeData.length
-                                  ? treeData
-                                  : setAreaTreeFormat(indexTreeData)
-                              }
-                              onChange={value => siteOnChange(value, index)}
-                              value={item.siteId}
-                              treeDataSimpleMode
-                              placeholder="选择站点"
-                              loadData={obj => areaOnLoadData(obj)}
-                              style={{ width: 200 }}
-                              allowClear
-                            />
-                            <TreeSelect
-                              value={item.columnId}
-                              treeDataSimpleMode
-                              placeholder="选择栏目"
-                              loadData={obj => areaOnLoadData(obj)}
-                              style={{ width: 300 }}
-                              allowClear
-                            />
-                          </div>
-                        );
-                      })}
+                      <div>
+                        <TreeSelect
+                          treeData={siteTreeDatas}
+                          onChange={(value, label, extra) => {
+                            siteOnChange(value, label, extra);
+                          }}
+                          value={site.siteId}
+                          treeDataSimpleMode
+                          placeholder="选择站点"
+                          loadData={obj => siteOnLoadData(obj)}
+                          style={{ width: 200 }}
+                          allowClear
+                        />
+                        <TreeSelect
+                          treeData={columnTreeDatas}
+                          value={columnId}
+                          onChange={(value, label, extra) => columnOnChange(value, label, extra)}
+                          multiple
+                          treeDefaultExpandAll
+                          placeholder="选择栏目"
+                          style={{ width: 300 }}
+                          allowClear
+                        />
+                        <Button type="primary" style={{ marginLeft: 10 }} onClick={addSite}>
+                          添加
+                        </Button>
+                        <div className={styles.siteBox}>
+                          <p>已选栏目：</p>
+                          {hasSite.length > 0 &&
+                            hasSite.map(item => {
+                              return (
+                                <div key={item.siteId}>
+                                  <h3>{item.label}</h3>
+                                  {item.columnId.map(items => {
+                                    return <span key={items.columnId}>{items.label}</span>;
+                                  })}
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
                     </Col>
                     <Col span={4} pull={14}>
                       <div className={styles.treeName}>选择栏目：</div>
@@ -367,7 +477,6 @@ const UpdateForm = props => {
                 </div>
               </>
             )}
-
             {visible && (
               <div className={styles.treeBox}>
                 <Row>
@@ -409,7 +518,7 @@ const UpdateForm = props => {
                 <Row>
                   <Col span={19} push={4}>
                     <Upload {...sliderImgProps}>
-                      <Button loading={loading} style={{ backgroundImage: `url(${sliderImg})` }}>
+                      <Button loading={loading} style={{ backgroundImage: `url(${sliderImgBg})` }}>
                         上传
                       </Button>
                     </Upload>
@@ -417,9 +526,13 @@ const UpdateForm = props => {
                 </Row>
               </div>
             )}
-            <Form.Item width="xs" name="orderNum" label="显示顺序" rules={[{ required: true }]}>
+            <Form.Item width="xs" name="orderNum" label="显示顺序">
               <InputNumber min={0} max={1000} />
             </Form.Item>
+            <Form.Item width="xs" name="publishTime" label="发布时间">
+              <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
+            </Form.Item>
+
             <Form.Item
               width="xs"
               name="content"
@@ -446,14 +559,6 @@ const UpdateForm = props => {
                 // media={{ uploadFn: myUploadFn }}
               />
             </Form.Item>
-            {/* <div className={styles.treeBox}>
-              <Row>
-                <Col span={19} push={4}></Col>
-                <Col span={4} pull={19}>
-                  <div className={styles.treeName}>文章：</div>
-                </Col>
-              </Row>
-            </div> */}
           </Form>
         </Spin>
       </Drawer>

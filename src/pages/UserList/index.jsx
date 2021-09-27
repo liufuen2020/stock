@@ -98,13 +98,17 @@ const TableList = () => {
     const hide = message.loading('正在删除');
 
     try {
-      await removeRule(id);
+      const msg = await removeRule(id);
       hide();
-      message.success('删除成功！');
-      if (actionRef.current) {
-        actionRef.current.reload();
+      if (msg.code === 0) {
+        message.success('删除成功！');
+        if (actionRef.current) {
+          actionRef.current.reload();
+        }
+        return true;
       }
-      return true;
+      message.error(msg.msg || '删除失败，请重试');
+      return false;
     } catch (error) {
       hide();
       message.error('删除失败，请重试');

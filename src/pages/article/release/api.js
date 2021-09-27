@@ -70,3 +70,12 @@ export async function tagList(params, options) {
     ...(options || {}),
   });
 }
+
+// 通过站点获取栏目 /cmsColumn/columnTree/
+
+// 详情
+export async function columnTree(options) {
+  return request(`/api/cmsColumn/columnTree/${options}`, {
+    method: 'GET',
+  });
+}

@@ -9,6 +9,7 @@ import { getList, removeField, tagList, audit } from './api';
 import { cmsCategoryTree } from '../category/api';
 import { cmsSiteTree } from '../site/api';
 import UpdateForm from './components/UpdateForm';
+import styles from './index.less';
 
 /**
  * @en-US Add node
@@ -204,22 +205,30 @@ const TableList = () => {
       title: '标签',
       dataIndex: 'tags',
       render: (_, record) => {
-        return <>{record.tags.join('，')}</>;
+        return record.tags.map(item => {
+          return (
+            <span key={item.tagId} className={styles.tag}>
+              {item.tagName}
+            </span>
+          );
+        });
       },
     },
     {
       title: '是否置顶',
       dataIndex: 'top',
-      // render: (_, record) => {
-      //   return <>{record.tags.join('，')}</>;
-      // },
+      align: 'center',
+      render: (_, record) => {
+        return <>{record.top ? '否' : '是'}</>;
+      },
     },
     {
       title: '是否原创',
       dataIndex: 'original',
-      // render: (_, record) => {
-      //   return <>{record.tags.join('，')}</>;
-      // },
+      align: 'center',
+      render: (_, record) => {
+        return <>{record.original ? '否' : '是'}</>;
+      },
     },
     // {
     //   title: '创建时间',

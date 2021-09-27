@@ -42,13 +42,17 @@ const TableList = () => {
     const hide = message.loading('正在删除');
 
     try {
-      await removeField(id);
+      const msg = await removeField(id);
       hide();
-      message.success('删除成功！');
-      if (actionRef.current) {
-        actionRef.current.reload();
+      if (msg.code === 0) {
+        message.success('删除成功！');
+        if (actionRef.current) {
+          actionRef.current.reload();
+        }
+        return true;
       }
-      return true;
+      message.error(msg.msg || '删除失败，请重试');
+      return false;
     } catch (error) {
       hide();
       message.error('删除失败，请重试');

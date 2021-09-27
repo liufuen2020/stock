@@ -134,6 +134,12 @@ export default [
         component: './article/tag',
       },
       {
+        path: '/article/batchSaveWords',
+        name: '敏感词',
+        icon: 'smile',
+        component: './article/batchSaveWords',
+      },
+      {
         component: './404',
       },
     ],
