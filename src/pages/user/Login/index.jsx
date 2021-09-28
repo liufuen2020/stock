@@ -7,8 +7,6 @@ import { useIntl, history, FormattedMessage, SelectLang, useModel } from 'umi';
 import Footer from '@/components/Footer';
 import Local from '@/utils/local';
 import { login, getCaptcha } from '@/services/ant-design-pro/api';
-// import { login, getMenu } from '@/services/ant-design-pro/api';
-// import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import styles from './index.less';
 
 const LoginMessage = ({ content }) => (
@@ -24,17 +22,16 @@ const LoginMessage = ({ content }) => (
 
 const Login = () => {
   const [submitting, setSubmitting] = useState(false);
-  // const [userLoginState, setUserLoginState] = useState({});
   const [type, setType] = useState('account');
   const { initialState, setInitialState } = useModel('@@initialState');
 
-  const [captchaImg, setCaptchaImg] = useState();
+  const [captchaObj, setCaptchaObj] = useState({ uuid: '', image: '' });
 
   // 验证码
   const getCaptchaData = () => {
     getCaptcha().then(res => {
       if (res.code === 0) {
-        setCaptchaImg(res.data && res.data.image);
+        setCaptchaObj(res.data);
       }
     });
   };
@@ -73,6 +70,7 @@ const Login = () => {
       // 登录
       const payload = {
         appId: '',
+        uuid: captchaObj.uuid,
         captcha: values.captcha,
         password: values.password,
         userName: values.userName,
@@ -99,23 +97,10 @@ const Login = () => {
           await fetchDictDatas();
 
           setTimeout(() => {
-            // history.push(redirect || '/');
             window.location.href = redirect || '/';
           }, 50);
-
-          // // 获取路由
-          // routes().then(res => {
-          //   if (res.code === 0) {
-          //     Local.set('currentRoute', res.data);
-          //     setTimeout(() => {
-          //       history.push(redirect || '/');
-          //     }, 50);
-          //   }
-          // });
         }
       }
-      // 如果失败去设置用户错误信息
-      // setUserLoginState(msg);
     } catch (error) {
       const defaultLoginFailureMessage = intl.formatMessage({
         id: 'pages.login.failure',
@@ -127,7 +112,6 @@ const Login = () => {
     setSubmitting(false);
   };
 
-  // const { status, type: loginType } = userLoginState;
   const { status, type: loginType } = {};
 
   return (
@@ -136,20 +120,6 @@ const Login = () => {
         {SelectLang && <SelectLang />}
       </div>
       <div className={styles.content}>
-        <div className={styles.top}>
-          {/* <div className={styles.header}>
-            <Link to="/">
-              <img alt="logo" className={styles.logo} src="/logo.svg" />
-              <span className={styles.title}>Ant Design</span>
-            </Link>
-          </div> */}
-          {/* <div className={styles.desc}>
-            {intl.formatMessage({
-              id: 'pages.layouts.userLayout.title',
-            })}
-          </div> */}
-        </div>
-
         <div className={styles.main}>
           <ProForm
             initialValues={{
@@ -245,9 +215,9 @@ const Login = () => {
                       },
                     ]}
                   />
-                  {captchaImg && (
+                  {captchaObj && captchaObj.image && (
                     <img
-                      src={`data:image/gif;base64,${captchaImg}`}
+                      src={`data:image/gif;base64,${captchaObj.image}`}
                       onClick={getCaptchaData}
                       style={{ height: 40, marginBottom: 24 }}
                     />

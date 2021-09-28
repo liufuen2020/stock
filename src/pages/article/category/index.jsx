@@ -5,7 +5,7 @@ import { FormattedMessage } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 // import moment from 'moment';
-import { getList, removeField, cmsCategoryTree } from './api';
+import { getList, removeField } from './api';
 import UpdateForm from './components/UpdateForm';
 
 /**
@@ -29,8 +29,6 @@ const getListData = async fields => {
 
 const TableList = () => {
   const actionRef = useRef();
-
-  const [treeData, setTreeData] = useState([]);
 
   /**
    *  Delete node
@@ -60,23 +58,7 @@ const TableList = () => {
     }
   };
 
-  // 获取 类别树结构
-  const getListTree = async fields => {
-    try {
-      const data = await cmsCategoryTree({ ...fields });
-      if (data.code === 0) {
-        setTreeData(data.data);
-        return;
-      }
-    } catch (error) {
-      message.error('请求失败，请重试');
-      return false;
-    }
-  };
-
-  useEffect(() => {
-    getListTree();
-  }, []);
+  useEffect(() => {}, []);
 
   // 更新数据 组件 ------------------------------------------------------------------
 
@@ -130,10 +112,6 @@ const TableList = () => {
     {
       title: '描述',
       dataIndex: 'description',
-    },
-    {
-      title: '父级ID',
-      dataIndex: 'parentId',
     },
     // {
     //   title: '创建时间',
@@ -190,7 +168,6 @@ const TableList = () => {
         data={updataData}
         onSuccess={updataSuccess}
         type={type}
-        indexTreeData={treeData}
       />
     </PageContainer>
   );

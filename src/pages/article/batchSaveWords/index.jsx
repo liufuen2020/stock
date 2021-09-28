@@ -115,7 +115,11 @@ const TableList = () => {
       dataIndex: 'startTime',
       valueType: 'option',
       render: (_, record) => {
-        return <>{moment(record.startTime).format('YYYY-MM-DD HH:mm:ss')}</>;
+        return (
+          <>
+            {(record.startTime && moment(record.startTime).format('YYYY-MM-DD HH:mm:ss')) || '--'}
+          </>
+        );
       },
     },
 
@@ -124,7 +128,9 @@ const TableList = () => {
       dataIndex: 'endTime',
       valueType: 'option',
       render: (_, record) => {
-        return <>{moment(record.endTime).format('YYYY-MM-DD HH:mm:ss')}</>;
+        return (
+          <>{(record.endTime && moment(record.endTime).format('YYYY-MM-DD HH:mm:ss')) || '--'}</>
+        );
       },
     },
 

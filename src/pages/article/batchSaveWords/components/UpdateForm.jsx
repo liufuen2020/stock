@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { message, Drawer, Form, Input, Button } from 'antd';
+import { message, Drawer, Form, Input, Button, DatePicker } from 'antd';
+import moment from 'moment';
 import { addField, upadataField } from '../api';
 
+const { RangePicker } = DatePicker;
 const UpdateForm = props => {
   // 结构化数据
   const { visible, onCancel, onSuccess, data, type } = props;
@@ -12,7 +14,10 @@ const UpdateForm = props => {
 
   // 详情
   const getDetailData = () => {
-    form.setFieldsValue({ ...data });
+    const time = [];
+    if (data.startTime) time[0] = moment(data.startTime);
+    if (data.endTime) time[1] = moment(data.endTime);
+    form.setFieldsValue({ ...data, time });
   };
 
   useEffect(() => {
@@ -26,7 +31,7 @@ const UpdateForm = props => {
   // 栅格化
   const formItemLayout = {
     labelCol: { span: 4 },
-    wrapperCol: { span: 14 },
+    wrapperCol: { span: 16 },
   };
 
   /**
@@ -38,7 +43,12 @@ const UpdateForm = props => {
   const updataData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    upadataField({ ...values, wordId: data.wordId }).then(res => {
+    const payload = {
+      word: values.word,
+      endTime: (values.time && values.time[0]) || '',
+      startTime: (values.time && values.time[1]) || '',
+    };
+    upadataField({ ...payload, wordId: data.wordId }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -58,8 +68,12 @@ const UpdateForm = props => {
   const addData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-
-    addField({ ...values }).then(res => {
+    const payload = {
+      word: values.word,
+      endTime: (values.time && values.time[0]) || '',
+      startTime: (values.time && values.time[1]) || '',
+    };
+    addField({ ...payload }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -115,6 +129,9 @@ const UpdateForm = props => {
         <Form {...formItemLayout} name="control-ref" form={form}>
           <Form.Item label="敏感词名称" name="word" rules={[{ required: true }]}>
             <Input maxLength={10} allowClear />
+          </Form.Item>
+          <Form.Item name="time" label="时效性">
+            <RangePicker showTime format="YYYY-MM-DD HH:mm:ss" />
           </Form.Item>
         </Form>
       </Drawer>
