@@ -361,8 +361,20 @@ const UpdateForm = props => {
 
   const siteOnChange = (value, label) => {
     setLoading(true);
+    let columnIds = [];
+    hasSite.map(item => {
+      if (item.siteId === value) columnIds = item.columnId;
+      return '';
+    });
     setSite({ siteId: value, label: label[0], columnId: [] });
-    setColumnId([]);
+
+    const columnIdVlaue = [];
+    columnIds.map(item => {
+      columnIdVlaue.push(item.columnId);
+      return '';
+    });
+
+    setColumnId(columnIdVlaue);
     setColumnTreeDatas([]);
     columnTree(value).then(res => {
       setLoading(false);

@@ -2,8 +2,8 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, message, Space, Tabs } from 'antd';
 import React, { useState, useEffect } from 'react';
-import ProForm, { ProFormCheckbox, ProFormText } from '@ant-design/pro-form';
-import { useIntl, history, FormattedMessage, SelectLang, useModel } from 'umi';
+import ProForm, { ProFormText } from '@ant-design/pro-form';
+import { useIntl, history, useModel } from 'umi';
 import Footer from '@/components/Footer';
 import Local from '@/utils/local';
 import { login, getCaptcha } from '@/services/ant-design-pro/api';
@@ -103,7 +103,7 @@ const Login = () => {
           }, 50);
         }
       } else {
-        message.error(msg.res || '登录失败，请检查密码账号');
+        message.error(msg.msg || '登录失败，请检查密码账号');
       }
     } catch (error) {
       const defaultLoginFailureMessage = intl.formatMessage({
@@ -120,9 +120,6 @@ const Login = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.lang} data-lang>
-        {SelectLang && <SelectLang />}
-      </div>
       <div className={styles.content}>
         <div className={styles.main}>
           <ProForm
@@ -230,7 +227,7 @@ const Login = () => {
               </>
             )}
 
-            <div
+            {/* <div
               style={{
                 marginBottom: 24,
               }}
@@ -245,7 +242,7 @@ const Login = () => {
               >
                 <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" />
               </a>
-            </div>
+            </div> */}
           </ProForm>
         </div>
       </div>
