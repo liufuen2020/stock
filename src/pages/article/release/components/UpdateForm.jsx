@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import React, { useState, useEffect } from 'react';
 import {
   message,
@@ -126,22 +127,22 @@ const setColumnDataTwo = columnData => {
   const b = {};
   const c = {};
   columnData.forEach(item => {
-    const id = columnData.siteId;
+    const id = item.siteId;
     a[id] = id;
     b[id] = b[id] || [];
     c[id] = item.siteName;
-    b[id].push({ columnId: item.columnId });
+    b[id].push({ columnId: item.columnId, label: item.columnName });
   });
 
   const f = [];
-  // for (let x in a) {
-  //   f.push({
-  //     siteId: a[x],
-  //     columnId: b[a[x]],
-  //   });
-  // }
-
-  // console.log(f);
+  // eslint-disable-next-line guard-for-in
+  for (const x in a) {
+    f.push({
+      siteId: a[x],
+      label: c[x],
+      columnId: b[a[x]],
+    });
+  }
   return f;
 };
 
@@ -207,7 +208,8 @@ const UpdateForm = props => {
           tagIds: setTag(res.data.tags),
           content: BraftEditor.createEditorState(res.data.content),
         });
-        setColumnDataTwo(res.data.siteColumns || []);
+        setHasSite(setColumnDataTwo(res.data.siteColumns || []));
+
         setSlider(data.slider);
         setBraftEditorValue(res.data.content);
         setSliderImg(res.data.sliderImg || null);
