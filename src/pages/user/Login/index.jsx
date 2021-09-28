@@ -32,6 +32,8 @@ const Login = () => {
     getCaptcha().then(res => {
       if (res.code === 0) {
         setCaptchaObj(res.data);
+      } else {
+        message.error(res.msg || '获取失败');
       }
     });
   };
@@ -100,6 +102,8 @@ const Login = () => {
             window.location.href = redirect || '/';
           }, 50);
         }
+      } else {
+        message.error(msg.res || '登录失败，请检查密码账号');
       }
     } catch (error) {
       const defaultLoginFailureMessage = intl.formatMessage({
