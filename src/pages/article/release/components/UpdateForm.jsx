@@ -15,6 +15,7 @@ import {
   Spin,
   DatePicker,
 } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
 import BraftEditor from 'braft-editor';
 import moment from 'moment';
 import 'braft-editor/dist/index.css';
@@ -72,7 +73,7 @@ const setSiteTreeFormat = datas => {
 /**
  * @zh-CN 栏目
  *
- * @param datas
+ * @param arr
  */
 
 const setColumnTreeFormat = arr => {
@@ -94,6 +95,61 @@ const setColumnTreeFormat = arr => {
   return newTreeData;
 };
 
+/**
+ * @zh-CN 处理 栏目数据
+ *
+ * @param columnData
+ */
+const setColumnData = columnData => {
+  const newdata = [];
+  columnData.map(item => {
+    item.columnId.map(items => {
+      const obj = {
+        siteId: item.siteId,
+        columnId: items.columnId,
+      };
+      newdata.push(obj);
+      return '';
+    });
+    return '';
+  });
+  return newdata;
+};
+
+/**
+ * @zh-CN 反处理 栏目数据
+ *
+ * @param columnData
+ */
+const setColumnDataTwo = columnData => {
+  const a = {};
+  const b = {};
+  const c = {};
+  columnData.forEach(item => {
+    const id = columnData.siteId;
+    a[id] = id;
+    b[id] = b[id] || [];
+    c[id] = item.siteName;
+    b[id].push({ columnId: item.columnId });
+  });
+
+  const f = [];
+  // for (let x in a) {
+  //   f.push({
+  //     siteId: a[x],
+  //     columnId: b[a[x]],
+  //   });
+  // }
+
+  // console.log(f);
+  return f;
+};
+
+/**
+ * @zh-CN 主函数 更新数据 UpdateForm
+ *
+ * @param props
+ */
 const UpdateForm = props => {
   // 结构化数据
   const { visible, onCancel, onSuccess, data, type, indexTreeData, tagList, siteTreeData } = props;
@@ -106,7 +162,9 @@ const UpdateForm = props => {
   const [treeValue, setTreeValue] = useState(); // 文章类型值
 
   const [slider, setSlider] = useState(1); // 轮播地址
-  const [sliderImg, setSliderImg] = useState(); // 轮播地址
+  const [sliderImg, setSliderImg] = useState(null); // 轮播地址
+  const [coverImage, setCoverImage] = useState(null); // 封面图
+
   const [BraftEditorValue, setBraftEditorValue] = useState(); // 编辑器
 
   const [siteTreeDatas, setSiteTreeDatas] = useState([]); //  站点树处理
@@ -115,15 +173,9 @@ const UpdateForm = props => {
   const [columnTreeDatas, setColumnTreeDatas] = useState([]); //  栏目树处理
   const [columnId, setColumnId] = useState([]); //  栏目树处理
 
-  const [hasSite, setHasSite] = useState([]);
+  const [hasSite, setHasSite] = useState([]); // 已选择的 栏目
 
-  // const [site, setSite] = useState([
-  //   {
-  //     siteId: 0,
-  //     columnId: [{ id: 0, label: '体育' }],
-  //   },
-  // ]);
-
+  const accessToken = local.get('token');
   /**
    * @zh-CN 编辑器事件
    *
@@ -146,6 +198,7 @@ const UpdateForm = props => {
     setLoading(true);
     getDetail(data.articleId).then(res => {
       setLoading(false);
+
       if (res.code === 0) {
         form.setFieldsValue({
           ...data,
@@ -154,9 +207,11 @@ const UpdateForm = props => {
           tagIds: setTag(res.data.tags),
           content: BraftEditor.createEditorState(res.data.content),
         });
+        setColumnDataTwo(res.data.siteColumns || []);
         setSlider(data.slider);
-        setSiteTreeDatas(setSiteTreeFormat(siteTreeData));
-        setBraftEditorValue(data.content);
+        setBraftEditorValue(res.data.content);
+        setSliderImg(res.data.sliderImg || null);
+        setCoverImage(res.data.coverImage || null);
       } else {
         message.error(res.msg || '详情请求失败，请重试');
       }
@@ -164,6 +219,12 @@ const UpdateForm = props => {
   };
   useEffect(() => {
     setTreeData(setAreaTreeFormat(indexTreeData));
+    setSiteTreeDatas(setSiteTreeFormat(siteTreeData));
+    setSite({ siteId: '', label: '', columnId: [] });
+    setHasSite([]);
+    setColumnId([]);
+    setSliderImg(null);
+    setCoverImage(null);
     form.setFieldsValue({ slider: 1 });
     if (type === 'updata' && visible === true) {
       getDetailData();
@@ -178,19 +239,6 @@ const UpdateForm = props => {
     labelCol: { span: 4 },
     wrapperCol: { span: 19 },
   };
-
-  const setListData = () => {
-    const newList = [];
-    site.map(item => {
-      const obj = {
-        columnId: item.columnId,
-        siteId: item.siteId,
-      };
-      newList.push(obj);
-      return '';
-    });
-    return newList;
-  };
   /**
 
    * @zh-CN 更新文章
@@ -203,13 +251,14 @@ const UpdateForm = props => {
     const payload = {
       categoryId: treeValue,
       content: BraftEditorValue,
-      sliderImg,
-      // list: setListData(),
+      sliderImg: values.slider === 0 ? sliderImg : null,
+      coverImage,
+      articleId: data.articleId,
+      list: setColumnData(hasSite),
     };
     upadataField({
       ...values,
       ...payload,
-      articleId: data.articleId,
     }).then(res => {
       hide();
       setLoading(false);
@@ -233,8 +282,9 @@ const UpdateForm = props => {
     const payload = {
       categoryId: treeValue,
       content: BraftEditorValue,
-      sliderImg,
-      list: setListData(),
+      sliderImg: values.slider === 0 ? sliderImg : null,
+      coverImage,
+      list: setColumnData(hasSite),
     };
     addField({ ...values, ...payload }).then(res => {
       hide();
@@ -255,6 +305,10 @@ const UpdateForm = props => {
    * @param values
    */
   const sendData = () => {
+    if (hasSite.length === 0) {
+      message.error('请选择栏目');
+      return;
+    }
     form.validateFields().then(values => {
       if (type === 'updata') updataData(values);
       if (type === 'add') addData(values);
@@ -265,7 +319,24 @@ const UpdateForm = props => {
     onCancel(false);
   };
 
-  // ------------------------------tree -----------------------
+  /**
+   * @zh-CN 删除封面
+   *
+   * @param values
+   */
+  const delCoverImage = () => {
+    setCoverImage(null);
+  };
+
+  /**
+   * @zh-CN 删除封面
+   *
+   * @param values
+   */
+  const delSliderImg = () => {
+    setSliderImg(null);
+  };
+  // ------------------------------tree ----------------------------------------------------------------------
 
   const areaOnLoadData = ({ id }) =>
     cmsCategoryTree({ categoryId: id }).then(res => {
@@ -289,8 +360,8 @@ const UpdateForm = props => {
   const siteOnChange = (value, label) => {
     setLoading(true);
     setSite({ siteId: value, label: label[0], columnId: [] });
-    setColumnTreeDatas([]);
     setColumnId([]);
+    setColumnTreeDatas([]);
     columnTree(value).then(res => {
       setLoading(false);
       if (res.code === 0) {
@@ -311,6 +382,36 @@ const UpdateForm = props => {
     });
   };
 
+  /**
+   * @zh-CN 添加栏目
+   *
+   * @param values
+   */
+  const addSite = obj => {
+    let state = true;
+    let newHasSite = JSON.parse(JSON.stringify(hasSite));
+    if (newHasSite.length === 0) {
+      newHasSite = newHasSite.concat([obj]);
+    }
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < newHasSite.length; i++) {
+      if (newHasSite[i].siteId === site.siteId) {
+        state = false;
+      }
+    }
+    if (state && obj.columnId.length) newHasSite = newHasSite.concat(obj);
+    // eslint-disable-next-line no-plusplus
+    for (let j = 0; j < newHasSite.length; j++) {
+      if (newHasSite[j].siteId === obj.siteId) {
+        newHasSite[j].columnId = obj.columnId;
+      }
+      if (newHasSite[j].columnId.length === 0) {
+        newHasSite.splice(j, 1);
+      }
+    }
+    setHasSite(newHasSite);
+  };
+
   const columnOnChange = (value, label) => {
     setColumnId(value);
 
@@ -323,31 +424,11 @@ const UpdateForm = props => {
       return '';
     });
     setSite({ ...site, columnId: columnIds });
-  };
-
-  /**
-   * @zh-CN 添加栏目
-   *
-   * @param values
-   */
-  const addSite = () => {
-    if (!site.siteId || site.columnId.length === 0) {
-      message.error('请选择栏目后，添加');
-      return;
-    }
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < hasSite.length; i++) {
-      if (hasSite[i].siteId === site.siteId) {
-        message.error('该站点已存在，请编辑或删除后操作');
-        return;
-      }
-    }
-    setHasSite(hasSite.concat([site]));
+    addSite({ ...site, columnId: columnIds });
   };
 
   //------------------------------------------------------------------------------------------------------------------
 
-  const accessToken = local.get('token');
   // 轮播图
   const sliderImgProps = {
     headers: {
@@ -369,11 +450,82 @@ const UpdateForm = props => {
   // eslint-disable-next-line no-undef
   const sliderImgBg = `${baseUrl}${sliderImg}`;
 
+  // 封面上传
+  const coverImageProps = {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    showUploadList: false,
+    data: { businessType: 'cms', fileName: 'fileName' },
+    // eslint-disable-next-line no-undef
+    action: `${API_PREFIX}/upload`,
+    onChange: info => {
+      setLoading(true);
+      if (info.file && info.file.response && info.file.response.code === 0) {
+        setLoading(false);
+        setCoverImage(info.file.response.data.fileUrl);
+      }
+    },
+    multiple: true,
+  };
+  // eslint-disable-next-line no-undef
+  const coverImageBg = `${baseUrl}${coverImage}`;
+
   // 监听字段变化
   const formChange = value => {
     if (value.slider || value.slider === 0) {
       setSlider(value.slider);
     }
+  };
+
+  // 编辑器
+  const myUploadFn = param => {
+    // eslint-disable-next-line no-undef
+    const serverURL = `${API_PREFIX}/upload`; // upload 是接口地址
+    const xhr = new XMLHttpRequest();
+    const fd = new FormData();
+
+    const successFn = () => {
+      if (JSON.parse(xhr.responseText).code !== 0) {
+        message.error('不支持此格式文件');
+        return;
+      }
+      // console.log(11111, response);
+      param.success({
+        // eslint-disable-next-line no-undef
+        url: `${baseUrl}${JSON.parse(xhr.responseText).data.fileUrl}`,
+        meta: {
+          // id: upLoadObject && upLoadObject.id,
+          // title: upLoadObject && upLoadObject.fileName,
+          // alt: upLoadObject && upLoadObject.fileName,
+          loop: false, // 指定音视频是否循环播放
+          autoPlay: false, // 指定音视频是否自动播放
+          controls: false, // 指定音视频是否显示控制栏
+          poster: '', // 指定视频播放器的封面
+        },
+      });
+    };
+
+    const progressFn = event => {
+      // 上传进度发生变化时调用param.progress
+      param.progress((event.loaded / event.total) * 100);
+    };
+
+    const errorFn = () => {
+      // 上传发生错误时调用param.error
+      param.error({
+        msg: '删除失败',
+      });
+    };
+    xhr.upload.addEventListener('progress', progressFn, false);
+    xhr.addEventListener('load', successFn, false);
+    xhr.addEventListener('error', errorFn, false);
+    xhr.addEventListener('abort', errorFn, false);
+    fd.append('file', param.file);
+    fd.append('businessType', 'cms-braftEditor');
+    xhr.open('POST', serverURL, true);
+    xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`); // header中token的设置
+    xhr.send(fd);
   };
 
   return (
@@ -451,15 +603,15 @@ const UpdateForm = props => {
                           style={{ width: 300 }}
                           allowClear
                         />
-                        <Button type="primary" style={{ marginLeft: 10 }} onClick={addSite}>
+                        {/* <Button type="primary" style={{ marginLeft: 10 }} onClick={addSite}>
                           添加
-                        </Button>
+                        </Button> */}
                         <div className={styles.siteBox}>
                           <p>已选栏目：</p>
                           {hasSite.length > 0 &&
                             hasSite.map(item => {
                               return (
-                                <div key={item.siteId}>
+                                <div key={item.siteId} className={styles.siteIdBox}>
                                   <h3>{item.label}</h3>
                                   {item.columnId.map(items => {
                                     return <span key={items.columnId}>{items.label}</span>;
@@ -518,21 +670,56 @@ const UpdateForm = props => {
                 <Row>
                   <Col span={19} push={4}>
                     <Upload {...sliderImgProps}>
-                      <Button loading={loading} style={{ backgroundImage: `url(${sliderImgBg})` }}>
+                      <Button
+                        loading={loading}
+                        className={styles.uploadBtnBg}
+                        style={{
+                          backgroundImage: `url(${sliderImgBg})`,
+                          backgroundSize: '100%',
+                          fontWeight: 'bold',
+                        }}
+                      >
                         上传
                       </Button>
                     </Upload>
+                    <span className={styles.del} onClick={delSliderImg}>
+                      <DeleteOutlined />
+                    </span>
                   </Col>
                 </Row>
               </div>
             )}
+
             <Form.Item width="xs" name="orderNum" label="显示顺序">
               <InputNumber min={0} max={1000} />
             </Form.Item>
             <Form.Item width="xs" name="publishTime" label="发布时间">
               <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
             </Form.Item>
-
+            <div className={styles.coverImage}>
+              <Row>
+                <Col span={14} push={4}>
+                  <Upload {...coverImageProps}>
+                    <Button
+                      loading={loading}
+                      style={{
+                        backgroundImage: `url(${coverImageBg})`,
+                        backgroundSize: '100%',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      上传
+                    </Button>
+                  </Upload>
+                  <span className={styles.del} onClick={delCoverImage}>
+                    <DeleteOutlined />
+                  </span>
+                </Col>
+                <Col span={4} pull={14}>
+                  <div className={styles.coverImageName}>文章封面：</div>
+                </Col>
+              </Row>
+            </div>
             <Form.Item
               width="xs"
               name="content"
@@ -556,7 +743,7 @@ const UpdateForm = props => {
                 // controls={controls}
                 placeholder="请输入正文内容"
                 onChange={handleChange}
-                // media={{ uploadFn: myUploadFn }}
+                media={{ uploadFn: myUploadFn }}
               />
             </Form.Item>
           </Form>

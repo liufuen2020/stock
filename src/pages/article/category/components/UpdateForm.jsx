@@ -1,45 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import {
-  message,
-  Drawer,
-  Form,
-  Input,
-  Button,
-  Radio,
-  InputNumber,
-  Row,
-  Col,
-  TreeSelect,
-} from 'antd';
-import { addField, upadataField, cmsCategoryTree } from '../api';
-import styles from '../index.less';
-
-const setAreaTreeFormat = datas => {
-  const newData = [];
-  datas.map(item => {
-    const obj = {
-      id: item.categoryId,
-      value: item.categoryId,
-      pId: item.parentId,
-      title: item.categoryName,
-      isLeaf: !item.parentNode,
-    };
-    newData.push(obj);
-    return '';
-  });
-  return newData;
-};
+import { message, Drawer, Form, Input, Button, Radio, InputNumber } from 'antd';
+import { addField, upadataField } from '../api';
 
 const UpdateForm = props => {
   // 结构化数据
-  const { visible, onCancel, onSuccess, data, type, indexTreeData } = props;
+  const { visible, onCancel, onSuccess, data, type } = props;
 
   // 初始化 form
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-
-  const [treeData, setTreeData] = useState([]);
-  const [treeValue, setTreeValue] = useState();
 
   // 详情
   const getDetailData = () => {
@@ -47,7 +16,6 @@ const UpdateForm = props => {
   };
 
   useEffect(() => {
-    setTreeData(setAreaTreeFormat(indexTreeData));
     if (type === 'updata' && visible === true) {
       getDetailData();
     } else {
@@ -70,7 +38,7 @@ const UpdateForm = props => {
   const updataData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    upadataField({ ...values, categoryId: data.categoryId, parentId: treeValue }).then(res => {
+    upadataField({ ...values, categoryId: data.categoryId }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -91,7 +59,7 @@ const UpdateForm = props => {
     const hide = message.loading('正在添加');
     setLoading(true);
 
-    addField({ ...values, parentId: treeValue }).then(res => {
+    addField({ ...values }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -120,33 +88,6 @@ const UpdateForm = props => {
     onCancel(false);
   };
 
-  // ------------------------------tree -----------------------
-
-  const areaOnLoadData = ({ id }) =>
-    cmsCategoryTree({ categoryId: id }).then(res => {
-      if (res.code === 0) {
-        setTreeData(treeData.concat(setAreaTreeFormat(res.data)));
-      }
-    });
-
-  const areaTreeDataChange = value => {
-    setTreeValue(value);
-  };
-
-  const areaTProps = {
-    treeData: treeData && treeData.length ? treeData : setAreaTreeFormat(indexTreeData),
-    value: treeValue,
-    onChange: value => {
-      areaTreeDataChange(value);
-    },
-    placeholder: '',
-    style: {
-      width: '100%',
-    },
-  };
-
-  //-------------------------------------------------------------------------
-
   return (
     <>
       <Drawer
@@ -172,31 +113,11 @@ const UpdateForm = props => {
         }
       >
         <Form {...formItemLayout} name="control-ref" form={form}>
-          {visible && (
-            <div className={styles.treeBox}>
-              <Row>
-                <Col span={14} push={4}>
-                  <TreeSelect
-                    {...areaTProps}
-                    treeDataSimpleMode
-                    loadData={obj => areaOnLoadData(obj)}
-                    allowClear
-                  />
-                </Col>
-                <Col span={4} pull={14}>
-                  <div className={styles.treeName}>父级类别：</div>
-                </Col>
-              </Row>
-            </div>
-          )}
           <Form.Item label="类别名称" name="categoryName" rules={[{ required: true }]}>
             <Input maxLength={20} allowClear />
           </Form.Item>
           <Form.Item label="描述" name="description">
             <Input.TextArea maxLength={200} allowClear />
-          </Form.Item>
-          <Form.Item label="icon" name="icon">
-            <Input maxLength={20} allowClear />
           </Form.Item>
           <Form.Item width="xs" name="orderNum" label="显示顺序" rules={[{ required: true }]}>
             <InputNumber min={0} max={1000} />

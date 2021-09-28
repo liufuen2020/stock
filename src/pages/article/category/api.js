@@ -15,7 +15,7 @@ export async function getList(params, options) {
 
 // 详情
 export async function cmsCategoryTree(params, options) {
-  return request(`/api/cmsCategory/tree`, {
+  return request('/api/cmsCategory/list', {
     method: 'GET',
     params: { ...params },
     ...(options || {}),
