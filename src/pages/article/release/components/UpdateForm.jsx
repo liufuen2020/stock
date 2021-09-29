@@ -135,7 +135,6 @@ const setColumnDataTwo = columnData => {
   });
 
   const f = [];
-  // eslint-disable-next-line guard-for-in
   for (const x in a) {
     f.push({
       siteId: a[x],
@@ -459,7 +458,8 @@ const UpdateForm = props => {
         setSliderImg(info.file.response.data.fileUrl);
       }
     },
-    multiple: true,
+    accept: 'image/gif,image/jpeg,image/png',
+    multiple: false,
   };
   // eslint-disable-next-line no-undef
   const sliderImgBg = `${baseUrl}${sliderImg}`;
@@ -480,7 +480,8 @@ const UpdateForm = props => {
         setCoverImage(info.file.response.data.fileUrl);
       }
     },
-    multiple: true,
+    accept: 'image/gif,image/jpeg,image/png',
+    multiple: false,
   };
   // eslint-disable-next-line no-undef
   const coverImageBg = `${baseUrl}${coverImage}`;

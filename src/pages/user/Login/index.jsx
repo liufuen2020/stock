@@ -33,7 +33,7 @@ const Login = () => {
       if (res.code === 0) {
         setCaptchaObj(res.data);
       } else {
-        message.error(res.msg || '获取失败');
+        message.error(res.msg || '获取验证码失败');
       }
     });
   };
