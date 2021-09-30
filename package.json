@@ -35,7 +35,11 @@
     "test:component": "umi test ./src/components",
     "tsc": "tsc --noEmit"
   },
-
+  "lint-staged": {
+    "**/*.{js,jsx,tsx,ts,less,md,json}": [
+      "prettier --write"
+    ]
+  },
   "browserslist": [
     "> 1%",
     "last 2 versions",

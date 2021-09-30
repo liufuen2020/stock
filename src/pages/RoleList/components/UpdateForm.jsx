@@ -200,7 +200,7 @@ const UpdateForm = props => {
           <Form.Item label="角色名称" name="roleName" rules={[{ required: true }]}>
             <Input maxLength={20} allowClear />
           </Form.Item>
-          <Form.Item label="权限字符串" name="roleKey" rules={[{ required: true }]}>
+          <Form.Item label="角色字符串" name="roleKey" rules={[{ required: true }]}>
             <Input maxLength={20} allowClear />
           </Form.Item>
           <Form.Item width="xs" name="roleSort" label="显示顺序" rules={[{ required: true }]}>

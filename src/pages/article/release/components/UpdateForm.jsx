@@ -15,40 +15,21 @@ import {
   Upload,
   Spin,
   DatePicker,
+  Modal,
 } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { useModel } from 'umi';
+import { DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import BraftEditor from 'braft-editor';
 import moment from 'moment';
 import 'braft-editor/dist/index.css';
 import local from '@/utils/local';
 
-import { addField, upadataField, getDetail, columnTree } from '../api';
-import { cmsCategoryTree } from '../../category/api';
+import { addField, upadataField, getDetail, columnTree, audit } from '../api';
 import { cmsSiteTree } from '../../site/api';
 
 import styles from '../index.less';
 
 const { Option } = Select;
-/**
- * @zh-CN 文章类型
- *
- * @param datas
- */
-const setAreaTreeFormat = datas => {
-  const newData = [];
-  datas.map(item => {
-    const obj = {
-      id: item.categoryId,
-      value: item.categoryId,
-      pId: item.parentId,
-      title: item.categoryName,
-      isLeaf: !item.parentNode,
-    };
-    newData.push(obj);
-    return '';
-  });
-  return newData;
-};
 
 /**
  * @zh-CN 站点树结构
@@ -135,6 +116,7 @@ const setColumnDataTwo = columnData => {
   });
 
   const f = [];
+  // eslint-disable-next-line guard-for-in
   for (const x in a) {
     f.push({
       siteId: a[x],
@@ -142,6 +124,7 @@ const setColumnDataTwo = columnData => {
       columnId: b[a[x]],
     });
   }
+
   return f;
 };
 
@@ -158,9 +141,6 @@ const UpdateForm = props => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
-  const [treeData, setTreeData] = useState([]); // 文章类型
-  const [treeValue, setTreeValue] = useState(); // 文章类型值
-
   const [slider, setSlider] = useState(1); // 轮播地址
   const [sliderImg, setSliderImg] = useState(null); // 轮播地址
   const [coverImage, setCoverImage] = useState(null); // 封面图
@@ -174,8 +154,21 @@ const UpdateForm = props => {
   const [columnId, setColumnId] = useState([]); //  栏目树处理
 
   const [hasSite, setHasSite] = useState([]); // 已选择的 栏目
+  const [noEdit, setNoEdit] = useState(false); // 是否可编辑
+
+  const [currentState, setCurrentState] = useState(); // 当前状态
+  const [currentId, setCurrentId] = useState(); // 当前Id
 
   const accessToken = local.get('token');
+
+  const { initialState } = useModel('@@initialState');
+
+  const isCmsAdmin =
+    initialState.currentUser && initialState.currentUser.roles
+      ? // eslint-disable-next-line no-undef
+        initialState.currentUser.roles.includes(CMS_ADMIN)
+      : false;
+
   /**
    * @zh-CN 编辑器事件
    *
@@ -199,16 +192,24 @@ const UpdateForm = props => {
     getDetail(data.articleId).then(res => {
       setLoading(false);
 
-      if (res.code === 0) {
+      if (res.code === 0 && res.data) {
         form.setFieldsValue({
           ...data,
           ...res.data,
           publishTime: moment(data.publishTime),
-          tagIds: setTag(res.data.tags),
+          tagIds: setTag(res.data.tags || ''),
           content: BraftEditor.createEditorState(res.data.content),
         });
         setHasSite(setColumnDataTwo(res.data.siteColumns || []));
-
+        if (res.data.state === 1 || res.data.state === 3) {
+          setNoEdit(true);
+        } else if (res.data.state === 2 && isCmsAdmin === true) {
+          setNoEdit(true);
+        } else {
+          setNoEdit(false);
+        }
+        setCurrentId(res.data.articleId);
+        setCurrentState(res.data.state);
         setSlider(data.slider);
         setBraftEditorValue(res.data.content);
         setSliderImg(res.data.sliderImg || null);
@@ -219,13 +220,13 @@ const UpdateForm = props => {
     });
   };
   useEffect(() => {
-    setTreeData(setAreaTreeFormat(indexTreeData));
     setSiteTreeDatas(setSiteTreeFormat(siteTreeData));
     setSite({ siteId: '', label: '', columnId: [] });
     setHasSite([]);
     setColumnId([]);
     setSliderImg(null);
     setCoverImage(null);
+    setNoEdit(false);
     form.setFieldsValue({ slider: 1 });
     if (type === 'updata' && visible === true) {
       getDetailData();
@@ -246,14 +247,14 @@ const UpdateForm = props => {
    *
    * @param fields
    */
-  const updataData = values => {
+  const updataData = (values, state) => {
     const hide = message.loading('正在添加');
     setLoading(true);
     const payload = {
-      categoryId: treeValue,
       content: BraftEditorValue,
       sliderImg: values.slider === 0 ? sliderImg : null,
       coverImage,
+      state: state || null,
       articleId: data.articleId,
       list: setColumnData(hasSite),
     };
@@ -277,14 +278,14 @@ const UpdateForm = props => {
    *
    * @param values
    */
-  const addData = values => {
+  const addData = (values, state) => {
     const hide = message.loading('正在添加');
     setLoading(true);
     const payload = {
-      categoryId: treeValue,
       content: BraftEditorValue,
       sliderImg: values.slider === 0 ? sliderImg : null,
       coverImage,
+      state: state || null,
       list: setColumnData(hasSite),
     };
     addField({ ...values, ...payload }).then(res => {
@@ -305,14 +306,14 @@ const UpdateForm = props => {
    *
    * @param values
    */
-  const sendData = () => {
+  const sendData = state => {
     if (hasSite.length === 0) {
       message.error('请选择栏目');
       return;
     }
     form.validateFields().then(values => {
-      if (type === 'updata') updataData(values);
-      if (type === 'add') addData(values);
+      if (type === 'updata') updataData(values, state);
+      if (type === 'add') addData(values, state);
     });
   };
 
@@ -337,26 +338,6 @@ const UpdateForm = props => {
   const delSliderImg = () => {
     setSliderImg(null);
   };
-  // ------------------------------tree ----------------------------------------------------------------------
-
-  const areaOnLoadData = ({ id }) =>
-    cmsCategoryTree({ categoryId: id }).then(res => {
-      if (res.code === 0) {
-        setTreeData(treeData.concat(setAreaTreeFormat(res.data)));
-      }
-    });
-
-  const areaTreeDataChange = value => {
-    setTreeValue(value);
-  };
-  const areaTProps = {
-    treeData: treeData && treeData.length ? treeData : setAreaTreeFormat(indexTreeData),
-    value: treeValue,
-    onChange: value => {
-      areaTreeDataChange(value);
-    },
-  };
-  // ----------------------------------------------------------------- end ------ site start -----------------
 
   const siteOnChange = (value, label) => {
     setLoading(true);
@@ -543,6 +524,28 @@ const UpdateForm = props => {
     xhr.send(fd);
   };
 
+  const handleSend = async state => {
+    const hide = message.loading('正在提交');
+    const ids = [];
+    ids[0] = currentId;
+    try {
+      const msg = await audit({ state, articleIds: ids });
+      hide();
+      if (msg.code === 0) {
+        message.success('提交成功！');
+        onCancel(false);
+        onSuccess();
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      hide();
+      message.error('提交失败，请重试');
+      return false;
+    }
+  };
+
   return (
     <>
       <Drawer
@@ -561,22 +564,95 @@ const UpdateForm = props => {
             <Button onClick={modelClose} style={{ marginRight: 10 }}>
               取消
             </Button>
-            <Button onClick={sendData} type="primary" loading={loading} disabled={loading}>
-              保存
-            </Button>
+
+            {currentState !== 1 ? (
+              <>
+                {(currentState === 0 || currentState === 2 || type === 'add') && noEdit === false && (
+                  <>
+                    <Button
+                      onClick={() => sendData()}
+                      type="primary"
+                      loading={loading}
+                      disabled={loading}
+                      style={{ marginRight: 10 }}
+                    >
+                      保存
+                    </Button>
+                    <Button
+                      onClick={() => sendData(1)}
+                      danger
+                      type="primary"
+                      loading={loading}
+                      disabled={loading}
+                    >
+                      提交
+                    </Button>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                <Button
+                  danger
+                  onClick={() => {
+                    Modal.confirm({
+                      title: '是否审核通过？',
+                      icon: <ExclamationCircleOutlined />,
+                      content: '',
+                      okText: '审核不通过',
+                      cancelText: '取消',
+                      onOk: () => {
+                        handleSend(2);
+                      },
+                    });
+                  }}
+                  type="primary"
+                  loading={loading}
+                  disabled={loading}
+                  style={{ marginRight: 10 }}
+                >
+                  审核不通过
+                </Button>
+                <Button
+                  onClick={() => {
+                    Modal.confirm({
+                      title: '是否审核通过？',
+                      icon: <ExclamationCircleOutlined />,
+                      content: '',
+                      okText: '审核通过',
+                      cancelText: '取消',
+                      onOk: () => {
+                        handleSend(3);
+                      },
+                    });
+                  }}
+                  type="primary"
+                  loading={loading}
+                  disabled={loading}
+                  style={{ marginRight: 10 }}
+                >
+                  审核通过
+                </Button>
+              </>
+            )}
           </div>
         }
       >
         <Spin spinning={loading}>
           <Form {...formItemLayout} name="control-ref" form={form} onValuesChange={formChange}>
             <Form.Item label="文章标题" name="articleTitle" rules={[{ required: true }]}>
-              <Input maxLength={120} allowClear style={{ width: 500 }} />
+              <Input maxLength={120} allowClear style={{ width: 500 }} disabled={noEdit} />
             </Form.Item>
             <Form.Item label="文章关键词" name="keywords" rules={[{ required: true }]}>
-              <Input maxLength={120} allowClear style={{ width: 500 }} />
+              <Input maxLength={120} allowClear style={{ width: 500 }} disabled={noEdit} />
             </Form.Item>
             <Form.Item name="tagIds" label="选择标签" rules={[{ required: true }]}>
-              <Select mode="multiple" placeholder="选择标签" style={{ width: 500 }}>
+              <Select
+                mode="multiple"
+                placeholder="选择标签"
+                style={{ width: 500 }}
+                disabled={noEdit}
+              >
                 {tagList &&
                   tagList.map(item => {
                     return (
@@ -588,7 +664,7 @@ const UpdateForm = props => {
               </Select>
             </Form.Item>
             <Form.Item label="文章简介" name="description">
-              <Input.TextArea maxLength={200} allowClear style={{ width: 500 }} />
+              <Input.TextArea maxLength={200} allowClear style={{ width: 500 }} disabled={noEdit} />
             </Form.Item>
             {visible && (
               <>
@@ -607,6 +683,7 @@ const UpdateForm = props => {
                           loadData={obj => siteOnLoadData(obj)}
                           style={{ width: 200 }}
                           allowClear
+                          disabled={noEdit}
                         />
                         <TreeSelect
                           treeData={columnTreeDatas}
@@ -617,6 +694,7 @@ const UpdateForm = props => {
                           placeholder="选择栏目"
                           style={{ width: 300 }}
                           allowClear
+                          disabled={noEdit}
                         />
                         {/* <Button type="primary" style={{ marginLeft: 10 }} onClick={addSite}>
                           添加
@@ -644,38 +722,34 @@ const UpdateForm = props => {
                 </div>
               </>
             )}
-            {visible && (
-              <div className={styles.treeBox}>
-                <Row>
-                  <Col span={14} push={4}>
-                    <TreeSelect
-                      {...areaTProps}
-                      treeDataSimpleMode
-                      loadData={obj => areaOnLoadData(obj)}
-                      style={{ width: 500 }}
-                      allowClear
-                    />
-                  </Col>
-                  <Col span={4} pull={14}>
-                    <div className={styles.treeName}>文章类型：</div>
-                  </Col>
-                </Row>
-              </div>
-            )}
+
+            <Form.Item name="categoryId" label="文章类型" rules={[{ required: true }]}>
+              <Select placeholder="选择标签" style={{ width: 500 }} disabled={noEdit}>
+                {indexTreeData.length &&
+                  indexTreeData.map(item => {
+                    return (
+                      <Option value={item.categoryId} key={item.categoryId}>
+                        {item.categoryName}
+                      </Option>
+                    );
+                  })}
+              </Select>
+            </Form.Item>
+
             <Form.Item name="top" label="是否置顶">
-              <Radio.Group>
+              <Radio.Group disabled={noEdit}>
                 <Radio value={0}>是</Radio>
                 <Radio value={1}>否</Radio>
               </Radio.Group>
             </Form.Item>
             <Form.Item name="original" label="是否原创">
-              <Radio.Group>
+              <Radio.Group disabled={noEdit}>
                 <Radio value={0}>是</Radio>
                 <Radio value={1}>否</Radio>
               </Radio.Group>
             </Form.Item>
             <Form.Item name="slider" label="是否轮播">
-              <Radio.Group>
+              <Radio.Group disabled={noEdit}>
                 <Radio value={0}>是</Radio>
                 <Radio value={1}>否</Radio>
               </Radio.Group>
@@ -706,10 +780,10 @@ const UpdateForm = props => {
             )}
 
             <Form.Item width="xs" name="orderNum" label="显示顺序">
-              <InputNumber min={0} max={1000} />
+              <InputNumber min={0} max={1000} disabled={noEdit} />
             </Form.Item>
             <Form.Item width="xs" name="publishTime" label="发布时间">
-              <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
+              <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" disabled={noEdit} />
             </Form.Item>
             <div className={styles.coverImage}>
               <Row>
@@ -754,6 +828,7 @@ const UpdateForm = props => {
             >
               <BraftEditor
                 className={styles.myEditor}
+                disabled={noEdit}
                 // value={BraftEditorValue}
                 // controls={controls}
                 placeholder="请输入正文内容"

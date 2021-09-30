@@ -72,5 +72,6 @@ export default defineConfig({
   define: {
     baseUrl: '',
     API_PREFIX: '',
+    CMS_ADMIN: 'cms_admin',
   },
 });

@@ -90,7 +90,6 @@ export async function getInitialState() {
       if (msg.code === 0) {
         return msg.data;
       }
-      message.error('获取字典表失败！');
       return {};
     } catch (error) {
       history.push(loginPath);
@@ -182,6 +181,8 @@ request.interceptors.request.use(async (url, options) => {
   };
 });
 
+let isTokenOverdue = true;
+
 request.interceptors.response.use(async res => {
   const response = await res.clone();
   const codeMaps = {
@@ -199,9 +200,13 @@ request.interceptors.response.use(async res => {
   if (response.status === 401) {
     // 跳转登录
     Local.clear();
-    message.error('token过期，请重新登录');
+    if (isTokenOverdue) {
+      message.error('token过期，请重新登录');
+    }
+    isTokenOverdue = false;
+
     setTimeout(() => {
-      // history.push(loginPath);
+      isTokenOverdue = true;
       window.location.href = loginPath;
     }, 1500);
     return false;

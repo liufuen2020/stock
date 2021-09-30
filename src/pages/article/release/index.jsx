@@ -1,10 +1,10 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, message, Divider, Popconfirm } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
-import { FormattedMessage } from 'umi';
+import { FormattedMessage, useModel } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
-// import moment from 'moment';
+import moment from 'moment';
 import { getList, removeField, tagList, audit } from './api';
 import { cmsCategoryTree } from '../category/api';
 import { cmsSiteTree } from '../site/api';
@@ -37,6 +37,14 @@ const TableList = () => {
   const [tagListData, setTagListData] = useState([]);
 
   const [siteTreeData, setSiteTreeData] = useState([]);
+
+  const { initialState } = useModel('@@initialState');
+
+  const isCmsAdmin =
+    initialState.currentUser && initialState.currentUser.roles
+      ? // eslint-disable-next-line no-undef
+        initialState.currentUser.roles.includes(CMS_ADMIN)
+      : false;
 
   /**
    *  Delete node
@@ -197,10 +205,7 @@ const TableList = () => {
       title: '作者姓名',
       dataIndex: 'authorName',
     },
-    {
-      title: '类别',
-      dataIndex: 'categoryName',
-    },
+
     {
       title: '标签',
       dataIndex: 'tags',
@@ -222,21 +227,37 @@ const TableList = () => {
         return <>{record.top ? '否' : '是'}</>;
       },
     },
+
     {
-      title: '是否原创',
-      dataIndex: 'original',
-      align: 'center',
+      title: '创建时间',
+      valueType: 'option',
+      dataIndex: 'createTime',
       render: (_, record) => {
-        return <>{record.original ? '否' : '是'}</>;
+        return <>{moment(record.createTime).format('YYYY-MM-DD')}</>;
       },
     },
-    // {
-    //   title: '创建时间',
-    //   dataIndex: 'createTime',
-    //   render: (_, record) => {
-    //     return <>{moment(record.createTime).format('YYYY-MM-DD')}</>;
-    //   },
-    // },
+    {
+      title: '状态',
+      dataIndex: 'state',
+      valueEnum: {
+        0: {
+          text: '待提交',
+          status: 'Processing',
+        },
+        1: {
+          text: '提交待审核',
+          status: 'Processing',
+        },
+        2: {
+          text: '审核不通过',
+          status: 'Error',
+        },
+        3: {
+          text: '审核通过已发布',
+          status: 'Success',
+        },
+      },
+    },
     {
       title: '操作',
       dataIndex: 'opt',
@@ -244,9 +265,31 @@ const TableList = () => {
       render: (_, record) => {
         const text = (
           <>
-            <Button type="link" onClick={() => setUpdateForm(record)}>
-              编辑
-            </Button>
+            {record.state === 0 && (
+              <Button type="link" onClick={() => setUpdateForm(record)}>
+                编辑
+              </Button>
+            )}
+            {record.state === 2 && isCmsAdmin === false && (
+              <Button type="link" onClick={() => setUpdateForm(record)}>
+                编辑
+              </Button>
+            )}
+            {record.state === 2 && isCmsAdmin === true && (
+              <Button type="link" onClick={() => setUpdateForm(record)}>
+                详情
+              </Button>
+            )}
+            {record.state === 1 && (
+              <Button type="link" onClick={() => setUpdateForm(record)}>
+                审核
+              </Button>
+            )}
+            {record.state === 3 && (
+              <Button type="link" onClick={() => setUpdateForm(record)}>
+                详情
+              </Button>
+            )}
             <Divider type="vertical" />
             <Popconfirm
               placement="topRight"
@@ -257,18 +300,6 @@ const TableList = () => {
             >
               <Button type="link">删除</Button>
             </Popconfirm>
-            <Divider type="vertical" />
-            {record.state === 0 && (
-              <Popconfirm
-                placement="topRight"
-                title="确实要提交此条文章吗？"
-                onConfirm={() => handleSend(1, record.articleId)}
-                okText="确定"
-                cancelText="取消"
-              >
-                <Button type="link">待提交</Button>
-              </Popconfirm>
-            )}
           </>
         );
         return <>{text}</>;
