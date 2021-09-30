@@ -764,6 +764,7 @@ const UpdateForm = props => {
                   <Col span={19} push={4}>
                     <Upload {...sliderImgProps}>
                       <Button
+                        disabled={noEdit}
                         loading={loading}
                         className={styles.uploadBtnBg}
                         style={{
@@ -775,9 +776,11 @@ const UpdateForm = props => {
                         上传
                       </Button>
                     </Upload>
-                    <span className={styles.del} onClick={delSliderImg}>
-                      <DeleteOutlined />
-                    </span>
+                    {!noEdit && (
+                      <span className={styles.del} onClick={delSliderImg}>
+                        <DeleteOutlined />
+                      </span>
+                    )}
                   </Col>
                 </Row>
               </div>
@@ -794,6 +797,7 @@ const UpdateForm = props => {
                 <Col span={14} push={4}>
                   <Upload {...coverImageProps}>
                     <Button
+                      disabled={noEdit}
                       loading={loading}
                       style={{
                         backgroundImage: `url(${coverImageBg})`,
@@ -804,9 +808,11 @@ const UpdateForm = props => {
                       上传
                     </Button>
                   </Upload>
-                  <span className={styles.del} onClick={delCoverImage}>
-                    <DeleteOutlined />
-                  </span>
+                  {!noEdit && (
+                    <span className={styles.del} onClick={delCoverImage}>
+                      <DeleteOutlined />
+                    </span>
+                  )}
                 </Col>
                 <Col span={4} pull={14}>
                   <div className={styles.coverImageName}>文章封面：</div>
