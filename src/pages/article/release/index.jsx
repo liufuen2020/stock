@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, message, Divider, Popconfirm } from 'antd';
+import { Button, message, Divider, Popconfirm, Modal } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { FormattedMessage, useModel } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
@@ -40,6 +40,11 @@ const TableList = () => {
 
   const { initialState } = useModel('@@initialState');
 
+  const [currentId, setCurrentId] = useState();
+  const [loading, setLoading] = useState();
+
+  const [visible, setVisible] = useState(false);
+
   const isCmsAdmin =
     initialState.currentUser && initialState.currentUser.roles
       ? // eslint-disable-next-line no-undef
@@ -54,10 +59,11 @@ const TableList = () => {
    */
   const handleRemove = async id => {
     const hide = message.loading('正在删除');
-
+    setLoading(true);
     try {
       const msg = await removeField(id);
       hide();
+      setLoading(false);
 
       if (msg.code === 0) {
         message.success('删除成功！');
@@ -70,6 +76,7 @@ const TableList = () => {
       return false;
     } catch (error) {
       hide();
+      setLoading(false);
       message.error('删除失败，请重试');
       return false;
     }
@@ -80,27 +87,61 @@ const TableList = () => {
    *
    * @param selectedRows
    */
-  const handleSend = async (state, id) => {
+  const handleSend = async (id, value, msg) => {
     const hide = message.loading('正在提交');
 
     const ids = [];
     ids[0] = id;
     try {
-      const msg = await audit({ state, articleIds: ids });
+      const res = await audit({ state: value, articleIds: ids });
       hide();
-      if (msg.code === 0) {
-        message.success('提交成功！');
+      if (res.code === 0) {
+        message.success(msg);
         if (actionRef.current) {
           actionRef.current.reload();
         }
+        setVisible(false);
         return true;
       }
+      message.success(res.msg || '提交失败');
 
       return false;
     } catch (error) {
       hide();
       message.error('提交失败，请重试');
       return false;
+    }
+  };
+
+  /**
+   * @zh-CN 状态审核
+   * @param state
+   */
+  const opt = (state, id) => {
+    setCurrentId(id);
+    if (state === 3) {
+      return (
+        <Popconfirm
+          placement="topRight"
+          title="确实要取消发布吗？"
+          onConfirm={() => handleSend(id, 4, '取消发布成功')}
+          okText="确定"
+          cancelText="取消"
+        >
+          <Divider type="vertical" />
+          <Button type="link">取消发布</Button>
+        </Popconfirm>
+      );
+    }
+    if (state === 1) {
+      return (
+        <>
+          <Divider type="vertical" />
+          <Button type="link" onClick={() => setVisible(true)}>
+            审核
+          </Button>
+        </>
+      );
     }
   };
 
@@ -253,8 +294,12 @@ const TableList = () => {
           status: 'Error',
         },
         3: {
-          text: '审核通过已发布',
+          text: '审核通过',
           status: 'Success',
+        },
+        4: {
+          text: '已取消发布',
+          status: 'Default',
         },
       },
     },
@@ -264,13 +309,18 @@ const TableList = () => {
       valueType: 'option',
       render: (_, record) => {
         const text = (
-          <>
+          <div className={styles.optBox}>
             {record.state === 0 && (
               <Button type="link" onClick={() => setUpdateForm(record)}>
                 编辑
               </Button>
             )}
             {record.state === 2 && isCmsAdmin === false && (
+              <Button type="link" onClick={() => setUpdateForm(record)}>
+                编辑
+              </Button>
+            )}
+            {record.state === 4 && (
               <Button type="link" onClick={() => setUpdateForm(record)}>
                 编辑
               </Button>
@@ -282,7 +332,7 @@ const TableList = () => {
             )}
             {record.state === 1 && (
               <Button type="link" onClick={() => setUpdateForm(record)}>
-                审核
+                详情
               </Button>
             )}
             {record.state === 3 && (
@@ -300,7 +350,8 @@ const TableList = () => {
             >
               <Button type="link">删除</Button>
             </Popconfirm>
-          </>
+            {opt(record.state, record.articleId)}
+          </div>
         );
         return <>{text}</>;
       },
@@ -332,6 +383,34 @@ const TableList = () => {
         siteTreeData={siteTreeData}
         indexTreeData={treeData}
       />
+      <Modal
+        visible={visible}
+        title="审核"
+        onCancel={() => setVisible(false)}
+        footer={[
+          <Button key="back" onClick={() => setVisible(false)}>
+            取消
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            danger
+            loading={loading}
+            onClick={() => handleSend(currentId, 2, '审核不通过')}
+          >
+            不通过
+          </Button>,
+          <Button
+            loading={loading}
+            type="primary"
+            onClick={() => handleSend(currentId, 3, '审核已通过')}
+          >
+            通过
+          </Button>,
+        ]}
+      >
+        <p>确定要审核通过吗？</p>
+      </Modal>
     </PageContainer>
   );
 };

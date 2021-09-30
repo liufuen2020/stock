@@ -567,28 +567,32 @@ const UpdateForm = props => {
 
             {currentState !== 1 ? (
               <>
-                {(currentState === 0 || currentState === 2 || type === 'add') && noEdit === false && (
-                  <>
-                    <Button
-                      onClick={() => sendData()}
-                      type="primary"
-                      loading={loading}
-                      disabled={loading}
-                      style={{ marginRight: 10 }}
-                    >
-                      保存
-                    </Button>
-                    <Button
-                      onClick={() => sendData(1)}
-                      danger
-                      type="primary"
-                      loading={loading}
-                      disabled={loading}
-                    >
-                      提交
-                    </Button>
-                  </>
-                )}
+                {(currentState === 0 ||
+                  currentState === 2 ||
+                  currentState === 4 ||
+                  type === 'add') &&
+                  noEdit === false && (
+                    <>
+                      <Button
+                        onClick={() => sendData()}
+                        type="primary"
+                        loading={loading}
+                        disabled={loading}
+                        style={{ marginRight: 10 }}
+                      >
+                        保存
+                      </Button>
+                      <Button
+                        onClick={() => sendData(1)}
+                        danger
+                        type="primary"
+                        loading={loading}
+                        disabled={loading}
+                      >
+                        提交
+                      </Button>
+                    </>
+                  )}
               </>
             ) : (
               <>
