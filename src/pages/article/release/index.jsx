@@ -1,16 +1,45 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, message, Divider, Popconfirm, Modal } from 'antd';
+import { Button, message, Divider, Popconfirm, Modal, Spin, Checkbox } from 'antd';
 import React, { useState, useRef, useEffect } from 'react';
 import { FormattedMessage, useModel } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 import moment from 'moment';
-import { getList, removeField, tagList, audit } from './api';
+import { getList, tagList, audit, getDetail } from './api';
 import { cmsCategoryTree } from '../category/api';
 import { cmsSiteTree } from '../site/api';
 import UpdateForm from './components/UpdateForm';
 import styles from './index.less';
 
+/**
+ * @zh-CN 反处理 栏目数据
+ *
+ * @param columnData
+ */
+const setColumnDataTwo = columnData => {
+  const a = {};
+  const b = {};
+  const c = {};
+  columnData.forEach(item => {
+    const id = item.siteId;
+    a[id] = id;
+    b[id] = b[id] || [];
+    c[id] = item.siteName;
+    b[id].push({ columnId: item.columnId, label: item.columnName });
+  });
+
+  const f = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for (const x in a) {
+    f.push({
+      siteId: a[x],
+      label: c[x],
+      columnId: b[a[x]],
+    });
+  }
+
+  return f;
+};
 /**
  * @en-US Add node
  * @zh-CN 添加节点
@@ -41,46 +70,18 @@ const TableList = () => {
   const { initialState } = useModel('@@initialState');
 
   const [currentId, setCurrentId] = useState();
-  const [loading, setLoading] = useState();
+  const [loading, setLoading] = useState(false);
 
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(false); // 审核模块
+  const [delVisible, setDelVisible] = useState(false); // 删除模块
+
+  const [delList, setDelList] = useState([]);
 
   const isCmsAdmin =
     initialState.currentUser && initialState.currentUser.roles
       ? // eslint-disable-next-line no-undef
         initialState.currentUser.roles.includes(CMS_ADMIN)
       : false;
-
-  /**
-   *  Delete node
-   * @zh-CN 删除节点
-   *
-   * @param selectedRows
-   */
-  const handleRemove = async id => {
-    const hide = message.loading('正在删除');
-    setLoading(true);
-    try {
-      const msg = await removeField(id);
-      hide();
-      setLoading(false);
-
-      if (msg.code === 0) {
-        message.success('删除成功！');
-        if (actionRef.current) {
-          actionRef.current.reload();
-        }
-        return true;
-      }
-      message.error(msg.msg || '删除失败！');
-      return false;
-    } catch (error) {
-      hide();
-      setLoading(false);
-      message.error('删除失败，请重试');
-      return false;
-    }
-  };
 
   /**
    * @zh-CN 状态提交
@@ -225,9 +226,43 @@ const TableList = () => {
   // ----------------------------------------------结束------------------------------------------------------
 
   /**
-   * @en-US International configuration
-   * @zh-CN 国际化配置
+   * @zh-CN 删除模块
    * */
+
+  const del = id => {
+    setLoading(true);
+    setDelList([]);
+    getDetail(id).then(res => {
+      setLoading(false);
+
+      if (res.code === 0 && res.data) {
+        setDelVisible(true);
+        const siteColumns = setColumnDataTwo(res.data.siteColumns) || [];
+        setDelList(siteColumns);
+      } else {
+        message.error(res.msg || '详情请求失败，请重试');
+      }
+    });
+    setDelVisible(true);
+  };
+
+  const onCheckColumnId = (e, i, j) => {
+    const newList = JSON.parse(JSON.stringify(delList));
+    newList[i].columnId[j].checked = e.target.checked;
+    setDelList(newList);
+  };
+
+  const onCheckAllChange = e => {
+    const newList = JSON.parse(JSON.stringify(delList));
+    newList.map(item => {
+      item.columnId.map(items => {
+        items.checked = e.target.checked;
+        return '';
+      });
+      return '';
+    });
+    setDelList(newList);
+  };
 
   const columns = [
     {
@@ -340,17 +375,12 @@ const TableList = () => {
                 详情
               </Button>
             )}
-            <Divider type="vertical" />
-            <Popconfirm
-              placement="topRight"
-              title="确实要删除此条文章吗？"
-              onConfirm={() => handleRemove(record.siteId)}
-              okText="确定"
-              cancelText="取消"
-            >
-              <Button type="link">删除</Button>
-            </Popconfirm>
+
             {opt(record.state, record.articleId)}
+            <Divider type="vertical" />
+            <Button type="link" onClick={() => del(record.articleId)}>
+              删除
+            </Button>
           </div>
         );
         return <>{text}</>;
@@ -359,58 +389,89 @@ const TableList = () => {
   ];
   return (
     <PageContainer>
-      <ProTable
-        actionRef={actionRef}
-        rowKey={record => record.articleId}
-        search={{
-          labelWidth: 120,
-        }}
-        toolBarRender={() => [
-          <Button type="primary" key="primary" onClick={addUser}>
-            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
-          </Button>,
-        ]}
-        request={getListData}
-        columns={columns}
-      />
-      <UpdateForm
-        visible={updateModalVisible}
-        onCancel={closeUpdateForm}
-        data={updataData}
-        onSuccess={updataSuccess}
-        type={type}
-        tagList={tagListData}
-        siteTreeData={siteTreeData}
-        indexTreeData={treeData}
-      />
-      <Modal
-        visible={visible}
-        title="审核"
-        onCancel={() => setVisible(false)}
-        footer={[
-          <Button key="back" onClick={() => setVisible(false)}>
-            取消
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            danger
-            loading={loading}
-            onClick={() => handleSend(currentId, 2, '审核不通过')}
-          >
-            不通过
-          </Button>,
-          <Button
-            loading={loading}
-            type="primary"
-            onClick={() => handleSend(currentId, 3, '审核已通过')}
-          >
-            通过
-          </Button>,
-        ]}
-      >
-        <p>确定要审核通过吗？</p>
-      </Modal>
+      <Spin spinning={loading}>
+        <ProTable
+          actionRef={actionRef}
+          rowKey={record => record.articleId}
+          search={{
+            labelWidth: 120,
+          }}
+          toolBarRender={() => [
+            <Button type="primary" key="primary" onClick={addUser}>
+              <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
+            </Button>,
+          ]}
+          request={getListData}
+          columns={columns}
+        />
+        <UpdateForm
+          visible={updateModalVisible}
+          onCancel={closeUpdateForm}
+          data={updataData}
+          onSuccess={updataSuccess}
+          type={type}
+          tagList={tagListData}
+          siteTreeData={siteTreeData}
+          indexTreeData={treeData}
+        />
+        <Modal
+          visible={visible}
+          title="审核"
+          onCancel={() => setVisible(false)}
+          footer={[
+            <Button key="back" onClick={() => setVisible(false)}>
+              取消
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              danger
+              loading={loading}
+              onClick={() => handleSend(currentId, 2, '审核不通过')}
+            >
+              不通过
+            </Button>,
+            <Button
+              loading={loading}
+              type="primary"
+              onClick={() => handleSend(currentId, 3, '审核已通过')}
+            >
+              通过
+            </Button>,
+          ]}
+        >
+          <p>确定要审核通过吗？</p>
+        </Modal>
+
+        <Modal
+          visible={delVisible}
+          title="删除"
+          onCancel={() => setDelVisible(false)}
+          okText="删除"
+        >
+          <Checkbox onChange={onCheckAllChange}>全部</Checkbox>
+          {delList.map((item, index) => {
+            return (
+              <div key={item.siteId} className={styles.delSiteIdBox}>
+                <h3>{item.label}</h3>
+
+                {item.columnId.map((items, indexs) => {
+                  return (
+                    <Checkbox
+                      checked={items.checked}
+                      key={items.columnId}
+                      value={items.columnId}
+                      onChange={e => onCheckColumnId(e, index, indexs)}
+                    >
+                      {items.label}
+                    </Checkbox>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </Modal>
+      </Spin>
     </PageContainer>
   );
 };
