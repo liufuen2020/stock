@@ -159,7 +159,7 @@ const TableList = () => {
     }
   };
 
-  // 获取 类别树结构
+  // 获取 站点树结构
   const getSiteTree = async fields => {
     try {
       const data = await cmsSiteTree({ ...fields });

@@ -1,16 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { message, Drawer, Form, Input, Button, Row, Col, TreeSelect } from 'antd';
-import { addField, upadataField, cmsColumnTree } from '../api';
+import { addField, upadataField } from '../api';
+import { columnTree } from '../../release/api';
+import { cmsSiteTree } from '../../site/api';
 import styles from '../index.less';
 
-const setAreaTreeFormat = datas => {
+/**
+ * @zh-CN 栏目
+ *
+ * @param arr
+ */
+
+const setColumnTreeFormat = arr => {
+  if (!arr || (arr && arr.length === 0)) return [];
+  const newTreeData = [];
+  arr.map(res => {
+    const obj = {
+      title: res.columnName,
+      value: res.columnId,
+      key: res.columnId,
+    };
+
+    if (res.children && res.children.length) {
+      obj.children = setColumnTreeFormat(res.children);
+    }
+    newTreeData.push(obj);
+    return '';
+  });
+  return newTreeData;
+};
+
+/**
+ * @zh-CN 站点树结构
+ *
+ * @param datas
+ */
+const setSiteTreeFormat = datas => {
   const newData = [];
   datas.map(item => {
     const obj = {
-      id: item.columnId,
-      value: item.columnId,
+      id: item.siteId,
+      value: item.siteId,
       pId: item.parentId,
-      title: item.columnName,
+      title: item.siteName,
       isLeaf: !item.parentNode,
     };
     newData.push(obj);
@@ -18,17 +50,19 @@ const setAreaTreeFormat = datas => {
   });
   return newData;
 };
-
 const UpdateForm = props => {
   // 结构化数据
-  const { visible, onCancel, onSuccess, data, type, indexTreeData } = props;
+  const { visible, onCancel, onSuccess, data, type, siteTreeData } = props;
 
   // 初始化 form
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
-  const [treeData, setTreeData] = useState([]);
+  const [treeDatas, setTreeDatas] = useState();
   const [treeValue, setTreeValue] = useState();
+
+  const [siteTreeDatas, setSiteTreeDatas] = useState([]); //  站点树处理
+  const [site, setSite] = useState(); //  站点树处理
 
   // 详情
   const getDetailData = () => {
@@ -37,8 +71,10 @@ const UpdateForm = props => {
   };
 
   useEffect(() => {
+    setSiteTreeDatas(setSiteTreeFormat(siteTreeData));
+    setSite();
+    setTreeValue();
     form.setFieldsValue({ audit: 0 });
-    setTreeData(setAreaTreeFormat(indexTreeData));
     if (type === 'updata' && visible === true) {
       getDetailData();
     } else {
@@ -54,6 +90,31 @@ const UpdateForm = props => {
     wrapperCol: { span: 14 },
   };
 
+  const siteOnChange = value => {
+    setLoading(true);
+    setSite(value);
+    setTreeDatas([]);
+    setTreeValue('');
+    columnTree(value).then(res => {
+      setLoading(false);
+      if (res.code === 0) {
+        const newArr = (res.data && [res.data]) || [];
+        setTreeDatas(setColumnTreeFormat(newArr));
+      } else {
+        message.error(res.msg || '栏目请求失败，请重试');
+      }
+    });
+  };
+
+  const siteOnLoadData = ({ id }) => {
+    return cmsSiteTree({ siteId: id }).then(res => {
+      if (res.code === 0 && res.data && res.data.length) {
+        const newSite = siteTreeDatas.concat(setSiteTreeFormat(res.data));
+        setSiteTreeDatas(newSite);
+      }
+    });
+  };
+
   /**
    * @en-US Update node
    * @zh-CN values
@@ -63,16 +124,18 @@ const UpdateForm = props => {
   const updataData = values => {
     const hide = message.loading('正在添加');
     setLoading(true);
-    upadataField({ ...values, columnId: data.columnId, parentId: treeValue }).then(res => {
-      hide();
-      setLoading(false);
-      if (res.code === 0) {
-        onCancel(false);
-        onSuccess();
-      } else {
-        message.error(res.msg || '修改失败，请重试');
-      }
-    });
+    upadataField({ ...values, columnId: data.columnId, parentId: treeValue, siteId: [site] }).then(
+      res => {
+        hide();
+        setLoading(false);
+        if (res.code === 0) {
+          onCancel(false);
+          onSuccess();
+        } else {
+          message.error(res.msg || '修改失败，请重试');
+        }
+      },
+    );
   };
   /**
    * @en-US Update node
@@ -84,7 +147,7 @@ const UpdateForm = props => {
     const hide = message.loading('正在添加');
     setLoading(true);
 
-    addField({ ...values, parentId: treeValue }).then(res => {
+    addField({ ...values, parentId: treeValue, siteId: [site] }).then(res => {
       hide();
       setLoading(false);
       if (res.code === 0) {
@@ -115,19 +178,18 @@ const UpdateForm = props => {
 
   // ------------------------------tree -----------------------
 
-  const areaOnLoadData = ({ id }) =>
-    cmsColumnTree({ columnId: id }).then(res => {
-      if (res.code === 0) {
-        setTreeData(treeData.concat(setAreaTreeFormat(res.data)));
-      }
-    });
+  // const areaOnLoadData = ({ id }) =>
+  //   cmsColumnTree({ columnId: id }).then(res => {
+  //     if (res.code === 0) {
+  //       setTreeData(treeData.concat(setAreaTreeFormat(res.data)));
+  //     }
+  //   });
 
   const areaTreeDataChange = value => {
     setTreeValue(value);
   };
 
   const areaTProps = {
-    treeData: treeData && treeData.length ? treeData : setAreaTreeFormat(indexTreeData),
     value: treeValue,
     onChange: value => {
       areaTreeDataChange(value);
@@ -170,18 +232,38 @@ const UpdateForm = props => {
               <Row>
                 <Col span={14} push={4}>
                   <TreeSelect
-                    {...areaTProps}
+                    treeData={siteTreeDatas}
+                    onChange={(value, label, extra) => {
+                      siteOnChange(value, label, extra);
+                    }}
                     treeDataSimpleMode
-                    loadData={obj => areaOnLoadData(obj)}
+                    placeholder="选择站点"
+                    loadData={obj => siteOnLoadData(obj)}
+                    style={{ width: 200 }}
                     allowClear
                   />
                 </Col>
                 <Col span={4} pull={14}>
-                  <div className={styles.treeName}>父级栏目：</div>
+                  <div className={styles.treeName}>选择站点：</div>
                 </Col>
               </Row>
             </div>
           )}
+          <div className={styles.treeBox}>
+            <Row>
+              <Col span={14} push={4}>
+                <TreeSelect
+                  {...areaTProps}
+                  treeData={treeDatas}
+                  allowClear
+                  placeholder="选择栏目"
+                />
+              </Col>
+              <Col span={4} pull={14}>
+                <div className={styles.treeName}>父级栏目：</div>
+              </Col>
+            </Row>
+          </div>
           <Form.Item label="栏目名称" name="columnName" rules={[{ required: true }]}>
             <Input maxLength={20} allowClear />
           </Form.Item>

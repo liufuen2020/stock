@@ -7,6 +7,7 @@ import ProTable from '@ant-design/pro-table';
 // import moment from 'moment';
 import { getList, removeField, cmsColumnTree } from './api';
 import UpdateForm from './components/UpdateForm';
+import { cmsSiteTree } from '../site/api';
 
 /**
  * @en-US Add node
@@ -31,6 +32,7 @@ const TableList = () => {
   const actionRef = useRef();
 
   const [treeData, setTreeData] = useState([]);
+  const [siteTreeData, setSiteTreeData] = useState([]);
 
   /**
    *  Delete node
@@ -74,8 +76,22 @@ const TableList = () => {
     }
   };
 
+  // 获取 站点树结构
+  const getSiteTree = async fields => {
+    try {
+      const data = await cmsSiteTree({ ...fields });
+      if (data.code === 0) {
+        setSiteTreeData(data.data);
+        return;
+      }
+    } catch (error) {
+      message.error('请求站点失败，请重试');
+      return false;
+    }
+  };
   useEffect(() => {
     getListTree();
+    getSiteTree();
   }, []);
 
   // 更新数据 组件 ------------------------------------------------------------------
@@ -188,6 +204,7 @@ const TableList = () => {
         onSuccess={updataSuccess}
         type={type}
         indexTreeData={treeData}
+        siteTreeData={siteTreeData}
       />
     </PageContainer>
   );
