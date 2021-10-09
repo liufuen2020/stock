@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 import moment from 'moment';
+import UploadFileModal from '@/components/UploadFileModal';
 import { getList, removeField } from './api';
 import UpdateForm from './components/UpdateForm';
 
@@ -67,6 +68,8 @@ const TableList = () => {
   const [updateModalVisible, handleUpdateModalVisible] = useState(false);
   const [updataData, setUpdataData] = useState({});
 
+  const [uploadVisible, setUploadVisible] = useState(false);
+
   const closeUpdateForm = () => {
     handleUpdateModalVisible(false);
   };
@@ -90,11 +93,9 @@ const TableList = () => {
     handleUpdateModalVisible(true);
   };
   // ----------------------------------------------结束------------------------------------------------------
-
-  /**
-   * @en-US International configuration
-   * @zh-CN 国际化配置
-   * */
+  const fileImport = () => {
+    setUploadVisible(true);
+  };
 
   const columns = [
     {
@@ -172,6 +173,9 @@ const TableList = () => {
           <Button type="primary" key="primary" onClick={addUser}>
             <PlusOutlined /> 新建
           </Button>,
+          <Button type="primary" key="primary" onClick={fileImport}>
+            <PlusOutlined /> 导入
+          </Button>,
         ]}
         request={getListData}
         columns={columns}
@@ -182,6 +186,37 @@ const TableList = () => {
         data={updataData}
         onSuccess={updataSuccess}
         type={type}
+      />
+
+      <UploadFileModal
+        visible={uploadVisible}
+        fileType="pdf"
+        num={2}
+        params={{
+          businessType: 'evaluationPlanFile',
+        }}
+        action={`${API_PREFIX}/upload`}
+        onCancel={() => {
+          // setUploadVisiblePdf(false);
+        }}
+        onSuccess={res => {
+          if (res.code === 0) {
+            const payload = { id, fileUrl: res.data.fileUrl };
+            // updateEvaluationPlanFile(payload).then(r => {
+            //   if (r.code === 0) {
+            //     message.success('上传成功！');
+            //     getData();
+            //     setUploadVisiblePdf(false);
+            //   } else {
+            //     message.error(r.msg ? r.msg : '上传失败，请重试');
+            //   }
+            // });
+          }
+        }}
+        onError={res => {
+          message.error(res.msg ? res.msg : '上传失败，请重试');
+          // setUploadVisiblePdf(false);
+        }}
       />
     </PageContainer>
   );

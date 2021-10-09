@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/alt-text */
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, message, Space, Tabs } from 'antd';
 import React, { useState, useEffect } from 'react';
@@ -6,6 +5,8 @@ import ProForm, { ProFormText } from '@ant-design/pro-form';
 import { useIntl, history, useModel } from 'umi';
 import Footer from '@/components/Footer';
 import Local from '@/utils/local';
+import CryptoJS from 'crypto-js';
+
 import { login, getCaptcha } from '@/services/ant-design-pro/api';
 import styles from './index.less';
 
@@ -26,6 +27,20 @@ const Login = () => {
   const { initialState, setInitialState } = useModel('@@initialState');
 
   const [captchaObj, setCaptchaObj] = useState({ uuid: '', image: '' });
+
+  const key = CryptoJS.enc.Utf8.parse('113813559663B1D1'); // 十六位十六进制数作为密钥
+  const iv = CryptoJS.enc.Utf8.parse(''); // 十六位
+
+  // 加密方法
+  const Encrypt = word => {
+    const srcs = CryptoJS.enc.Utf8.parse(word);
+    const encrypted = CryptoJS.AES.encrypt(srcs, key, {
+      iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    });
+    return encrypted.ciphertext.toString();
+  };
 
   // 验证码
   const getCaptchaData = () => {
@@ -74,6 +89,8 @@ const Login = () => {
         appId: '',
         uuid: captchaObj.uuid,
         captcha: values.captcha,
+        // password: Encrypt(values.password),
+        // userName: Encrypt(values.userName),
         password: values.password,
         userName: values.userName,
       };
@@ -217,6 +234,7 @@ const Login = () => {
                     ]}
                   />
                   {captchaObj && captchaObj.image && (
+                    // eslint-disable-next-line jsx-a11y/alt-text
                     <img
                       src={`data:image/gif;base64,${captchaObj.image}`}
                       onClick={getCaptchaData}

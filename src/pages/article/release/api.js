@@ -55,9 +55,20 @@ export async function audit(body, options) {
 
 /** 删除  */
 
-export async function removeField(options) {
-  return request(`/api/cmsArticle/article/${options}`, {
+// export async function removeField(options) {
+//   return request(`/api/cmsArticle/article/${options}`, {
+//     method: 'DELETE',
+//   });
+// }
+
+export async function removeField(body, options) {
+  return request('/api/cmsArticle/article', {
     method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
   });
 }
 

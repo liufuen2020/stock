@@ -5,7 +5,7 @@ import { FormattedMessage, useModel } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 import moment from 'moment';
-import { getList, tagList, audit, getDetail } from './api';
+import { getList, tagList, audit, getDetail, removeField } from './api';
 import { cmsCategoryTree } from '../category/api';
 import { cmsSiteTree } from '../site/api';
 import UpdateForm from './components/UpdateForm';
@@ -20,26 +20,55 @@ const setColumnDataTwo = columnData => {
   const a = {};
   const b = {};
   const c = {};
+  const d = {};
   columnData.forEach(item => {
     const id = item.siteId;
     a[id] = id;
     b[id] = b[id] || [];
     c[id] = item.siteName;
+    d[id] = item.articleId;
     b[id].push({ columnId: item.columnId, label: item.columnName });
   });
 
   const f = [];
-  // eslint-disable-next-line no-restricted-syntax
+  // eslint-disable-next-line guard-for-in
   for (const x in a) {
     f.push({
       siteId: a[x],
       label: c[x],
+      articleId: d[x],
       columnId: b[a[x]],
     });
   }
 
   return f;
 };
+
+/**
+ * @zh-CN 处理 栏目数据
+ *
+ * @param columnData
+ */
+const setColumnData = columnData => {
+  const newdata = [];
+  columnData.map(item => {
+    item.columnId.map(items => {
+      const obj = {
+        checked: items.checked,
+        articleId: item.articleId,
+        siteId: item.siteId,
+        columnId: items.columnId,
+      };
+      if (obj.checked === true) {
+        newdata.push(obj);
+      }
+      return '';
+    });
+    return '';
+  });
+  return newdata;
+};
+
 /**
  * @en-US Add node
  * @zh-CN 添加节点
@@ -76,6 +105,7 @@ const TableList = () => {
   const [delVisible, setDelVisible] = useState(false); // 删除模块
 
   const [delList, setDelList] = useState([]);
+  const [checkAll, setCheckAll] = useState(false);
 
   const isCmsAdmin =
     initialState.currentUser && initialState.currentUser.roles
@@ -188,6 +218,36 @@ const TableList = () => {
     }
   };
 
+  /**
+   *  Delete node
+   * @zh-CN 删除节点
+   *
+   * @param selectedRows
+   */
+  const handleRemove = async () => {
+    const hide = message.loading('正在删除');
+
+    setColumnData(delList);
+    try {
+      const msg = await removeField(setColumnData(delList));
+      hide();
+      if (msg.code === 0) {
+        message.success('删除成功！');
+        if (actionRef.current) {
+          actionRef.current.reload();
+        }
+        setDelVisible(false);
+        return true;
+      }
+      message.error(msg.msg || '删除失败，请重试');
+      return false;
+    } catch (error) {
+      hide();
+      message.error('删除失败，请重试');
+      return false;
+    }
+  };
+
   useEffect(() => {
     getListTree();
     getTagList();
@@ -232,6 +292,7 @@ const TableList = () => {
   const del = id => {
     setLoading(true);
     setDelList([]);
+    setCheckAll(false);
     getDetail(id).then(res => {
       setLoading(false);
 
@@ -250,10 +311,27 @@ const TableList = () => {
     const newList = JSON.parse(JSON.stringify(delList));
     newList[i].columnId[j].checked = e.target.checked;
     setDelList(newList);
+
+    let isAllChange = true;
+    newList.map(item => {
+      item.columnId.map(items => {
+        if (items.checked !== true) {
+          isAllChange = false;
+        }
+        return '';
+      });
+      return '';
+    });
+    if (!isAllChange) {
+      setCheckAll(false);
+    } else {
+      setCheckAll(true);
+    }
   };
 
   const onCheckAllChange = e => {
     const newList = JSON.parse(JSON.stringify(delList));
+    setCheckAll(e.target.checked);
     newList.map(item => {
       item.columnId.map(items => {
         items.checked = e.target.checked;
@@ -446,10 +524,13 @@ const TableList = () => {
         <Modal
           visible={delVisible}
           title="删除"
+          onOk={handleRemove}
           onCancel={() => setDelVisible(false)}
           okText="删除"
         >
-          <Checkbox onChange={onCheckAllChange}>全部</Checkbox>
+          <Checkbox onChange={onCheckAllChange} checked={checkAll}>
+            全部
+          </Checkbox>
           {delList.map((item, index) => {
             return (
               <div key={item.siteId} className={styles.delSiteIdBox}>
