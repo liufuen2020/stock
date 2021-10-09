@@ -34,6 +34,18 @@ export async function addField(body, options) {
   });
 }
 
+// 增加  批量
+export async function addBatchSaveWords(body, options) {
+  return request('/api/cmsSensitiveWords/batchSaveWords', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 export async function upadataField(body, options) {
   return request('/api/cmsSensitiveWords', {
     method: 'PUT',

@@ -5,7 +5,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
 import moment from 'moment';
 import UploadFileModal from '@/components/UploadFileModal';
-import { getList, removeField } from './api';
+import { getList, removeField, addBatchSaveWords } from './api';
 import UpdateForm from './components/UpdateForm';
 
 /**
@@ -195,27 +195,30 @@ const TableList = () => {
         params={{
           businessType: 'evaluationPlanFile',
         }}
+        // eslint-disable-next-line no-undef
         action={`${API_PREFIX}/upload`}
         onCancel={() => {
-          // setUploadVisiblePdf(false);
+          setUploadVisible(false);
         }}
         onSuccess={res => {
           if (res.code === 0) {
-            const payload = { id, fileUrl: res.data.fileUrl };
-            // updateEvaluationPlanFile(payload).then(r => {
-            //   if (r.code === 0) {
-            //     message.success('上传成功！');
-            //     getData();
-            //     setUploadVisiblePdf(false);
-            //   } else {
-            //     message.error(r.msg ? r.msg : '上传失败，请重试');
-            //   }
-            // });
+            const payload = { fileUrl: res.data.fileUrl };
+            addBatchSaveWords(payload).then(r => {
+              if (r.code === 0) {
+                message.success('上传成功！');
+                if (actionRef.current) {
+                  actionRef.current.reload();
+                }
+                setUploadVisible(false);
+              } else {
+                message.error(r.msg ? r.msg : '上传失败，请重试');
+              }
+            });
           }
         }}
         onError={res => {
           message.error(res.msg ? res.msg : '上传失败，请重试');
-          // setUploadVisiblePdf(false);
+          setUploadVisible(false);
         }}
       />
     </PageContainer>
