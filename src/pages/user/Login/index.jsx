@@ -89,10 +89,8 @@ const Login = () => {
         appId: '',
         uuid: captchaObj.uuid,
         captcha: values.captcha,
-        // password: Encrypt(values.password),
-        // userName: Encrypt(values.userName),
-        password: values.password,
-        userName: values.userName,
+        password: Encrypt(values.password),
+        userName: Encrypt(values.userName),
       };
       const msg = await login({ ...payload, type });
       if (msg.code === 0 && msg.data) {

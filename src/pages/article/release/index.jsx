@@ -148,7 +148,7 @@ const TableList = () => {
    * @zh-CN 状态审核
    * @param state
    */
-  const opt = (state, id) => {
+  const opts = (state, id) => {
     setCurrentId(id);
     if (state === 3) {
       return (
@@ -454,7 +454,7 @@ const TableList = () => {
               </Button>
             )}
 
-            {opt(record.state, record.articleId)}
+            {opts(record.state, record.articleId)}
             <Divider type="vertical" />
             <Button type="link" onClick={() => del(record.articleId)}>
               删除
