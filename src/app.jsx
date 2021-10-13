@@ -98,7 +98,7 @@ export async function getInitialState() {
   };
 
   // 如果是登录页面，不执行
-  if (history.location.pathname !== loginPath) {
+  if (history.location.pathname !== loginPath && Local.get('token')) {
     const currentUserData = await fetchUserInfo(); // 当前用户
     const currentRoute = await fetchCurrentRoute(); // 当前路由
     const dictData = await fetchDictData(); // 字典表
